@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">FirebaseChattingApplication</string>
+    <string name="login">Login</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password">Password</string>
+    <string name="create_your_naccount">Create Your\nAccount</string>
+    <string name="email">Email</string>
+    <string name="enter_email">Enter email</string>
+    <string name="enter_password">Enter password</string>
+    <string name="enter_confirm_password">Enter confirm password</string>
+    <string name="hello_nsign_in">Hello\nSign in!</string>
+    <string name="don_t_have_account">Don\'t have account?</string>
+    <string name="enter_name">Enter name</string>
+    <string name="name">Name</string>
+</resources>

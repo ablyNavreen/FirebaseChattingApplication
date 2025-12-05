@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/receivedLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="15dp"
+        android:background="@drawable/sent_rec"
+        android:layout_marginVertical="5dp">
+        <ImageView
+            android:id="@+id/senderDP"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/person"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/receivedTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello"
+            android:layout_marginTop="3dp"
+            android:layout_toRightOf="@id/senderDP"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/receivedName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="by hjfsfj"
+            android:layout_below="@id/receivedTV"
+            android:layout_toRightOf="@id/senderDP"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/sentLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/received_rec"
+        android:paddingVertical="8dp"
+        android:layout_gravity="end"
+        android:paddingHorizontal="15dp">
+        <ImageView
+            android:id="@+id/myDP"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_toRightOf="@id/msgs"
+            android:src="@drawable/person"
+            app:tint="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/msgs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/sentTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hello"
+                android:layout_marginTop="3dp"
+                android:layout_marginVertical="3dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/senderName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="by hjfsfj"
+                android:layout_below="@id/sentTV"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>

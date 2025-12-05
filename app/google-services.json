@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "192786858308",
+    "project_id": "fir-chattingapplication-1de73",
+    "storage_bucket": "fir-chattingapplication-1de73.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192786858308:android:984b8be10cff761a30d711",
+        "android_client_info": {
+          "package_name": "com.example.firebasechattingapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0PLEPUoMv99EP-vHPMxhvYISAoSLy4f4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
