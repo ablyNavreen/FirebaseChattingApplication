@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         app:menu="@menu/nav_menu"
         app:itemIconTint="@color/black"
+        android:background="@color/pink_color"
         app:itemTextColor="@color/black"
         android:layout_alignParentBottom="true"/>
 

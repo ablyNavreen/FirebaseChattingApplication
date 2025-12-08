@@ -1,4 +1,11 @@
 package com.example.firebasechattingapplication.model.dataclasses
 
-class User {
-}
+import com.google.firebase.firestore.DocumentId
+
+data class User (
+    val id : String?=null,
+    val name : String?=null,
+    val email : String?=null,
+    val gender : Int?=null,
+
+)

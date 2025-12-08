@@ -1,4 +1,11 @@
 package com.example.firebasechattingapplication.model.dataclasses
 
-class Message {
-}
+data class Message(
+    val senderId: String?=null,
+    val senderName: String?=null,
+    val receiverId: String?=null,
+    val receiverName: String?=null,
+    val message: String?=null,
+    val time: String?=null,
+    val isRead: Boolean?=null,
+)

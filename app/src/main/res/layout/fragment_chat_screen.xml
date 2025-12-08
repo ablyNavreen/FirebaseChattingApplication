@@ -3,24 +3,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
+    android:paddingBottom="@dimen/_15sdp"
+    android:background="@color/white"
+    android:paddingTop="@dimen/_8sdp"
+    android:paddingHorizontal="@dimen/_12sdp"
         android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/backIV"
+        android:layout_width="@dimen/_25sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:src="@drawable/baseline_arrow_back_24"/>
 
         <TextView
             android:id="@+id/tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="Chat Screen"
             android:fontFamily="sans-serif-black"
             android:textColor="@color/black"
-            android:textSize="20sp"/>
+            android:textSize="@dimen/_14ssp"/>
+     <TextView
+            android:id="@+id/lastSeenTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/black"
+         android:layout_below="@id/tv"
+            android:textSize="@dimen/_10ssp"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messagesRV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv"
+            android:layout_below="@id/lastSeenTV"
             tools:listitem="@layout/chat_message_item"
+            android:layout_marginVertical="@dimen/_12sdp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:layout_above="@id/sendMsgLayout">
 
@@ -30,7 +49,6 @@
             android:id="@+id/sendMsgLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
             android:layout_alignParentBottom="true">
 
             <EditText
@@ -47,9 +65,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="send"
+                android:fontFamily="sans-serif"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
-                android:background="@color/black"
+                android:background="@drawable/white_rounded_bg"
+                android:backgroundTint="@color/black"
                 android:layout_alignParentEnd="true"/>
 
 

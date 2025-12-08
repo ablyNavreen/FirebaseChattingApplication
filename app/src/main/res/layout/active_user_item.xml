@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/baseLayout"
+    app:cardCornerRadius="@dimen/_8sdp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:layout_marginHorizontal="@dimen/_5sdp"
+    android:layout_marginVertical="@dimen/_5sdp"
+    app:cardBackgroundColor="@color/white"
+    android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/userIV"
+            android:layout_width="@dimen/_45sdp"
+            android:layout_height="@dimen/_45sdp"
+            android:src="@drawable/baseline_account_circle_24"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/nameTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User Name"
+            android:textSize="@dimen/_13ssp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_below="@id/idTV"
+            android:textColor="@color/white"
+            android:layout_toRightOf="@id/userIV"
+            />
+</LinearLayout>

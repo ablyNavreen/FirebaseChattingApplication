@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:padding="@dimen/_15sdp"
+    android:layout_height="match_parent"
+    android:background="@drawable/maroon_black_gradient_bg"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/titleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profile"
+        android:textColor="@color/white"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:fontFamily="sans-serif-black"
+        android:textSize="@dimen/_16ssp"/>
+
+    <ImageView
+        android:id="@+id/profileIV"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="@dimen/_100sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleTV"
+        android:layout_marginVertical="@dimen/_20sdp"
+        android:src="@drawable/baseline_account_circle_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/nameTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.5"
+        android:text="Name"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_14ssp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/profileIV"/>
+
+
+    <TextView
+        android:id="@+id/usernameTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/nameTV"
+        app:layout_constraintWidth_percent="0.5"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="@dimen/_14ssp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toTopOf="@id/nameTV"/>
+
+
+
+    <TextView
+        android:id="@+id/emailTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.5"
+        android:text="Email"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_14ssp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/usernameTV"/>
+
+
+
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/emailTV"
+        app:layout_constraintWidth_percent="0.5"
+        android:text=""
+        android:textColor="@color/white"
+
+        android:textSize="@dimen/_14ssp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/usernameTV"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
