@@ -17,10 +17,12 @@
 
         <TextView
             android:id="@+id/tv"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:textAlignment="center"
             android:fontFamily="sans-serif-black"
+            android:layout_toRightOf="@+id/backIV"
             android:textColor="@color/black"
             android:textSize="@dimen/_14ssp"/>
      <TextView
@@ -33,13 +35,23 @@
          android:layout_below="@id/tv"
             android:textSize="@dimen/_10ssp"/>
 
+    <TextView
+        android:id="@+id/noMessagesTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No messages found!"
+        android:layout_centerInParent="true"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_10ssp"
+       />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messagesRV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/lastSeenTV"
             tools:listitem="@layout/chat_message_item"
-            android:layout_marginVertical="@dimen/_12sdp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:layout_above="@id/sendMsgLayout">
 
@@ -49,6 +61,7 @@
             android:id="@+id/sendMsgLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
             android:layout_alignParentBottom="true">
 
             <EditText

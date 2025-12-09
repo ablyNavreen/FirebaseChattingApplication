@@ -11,7 +11,7 @@ import com.example.firebasechattingapplication.model.dataclasses.User
 
 class UsersAdapter (var context: Context, private val users: List<User>) : RecyclerView.Adapter<UsersAdapter.HomeViewHolder>() {
 
-    var messageUser : ((userId : String,userName : String)->Unit)?=null
+    var messageUser : ((userId : String,userName : String, userGender : Int)->Unit)?=null
     inner class HomeViewHolder(val binding: UserListItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
@@ -24,12 +24,12 @@ class UsersAdapter (var context: Context, private val users: List<User>) : Recyc
            idTV.text = users[position].id
            nameTV.text = users[position].name
            emailTV.text = users[position].email
-//            if (users[position].gender == 1)
-//                userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
-//            else
-//                userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
+            if (users[position].gender == 1)
+                userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
+            else
+                userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
             baseLayout.setOnClickListener {
-                messageUser?.invoke(users[position].id.toString(),users[position].name.toString())
+                messageUser?.invoke(users[position].id.toString(),users[position].name.toString(), users[position].gender ?:0)
             }
         }
     }

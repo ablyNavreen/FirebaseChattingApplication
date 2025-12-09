@@ -8,4 +8,7 @@ data class Message(
     val message: String?=null,
     val time: String?=null,
     val isRead: Boolean?=null,
+    val senderGender: Int?=null,
+    val receiverGender: Int?=null,
+    val gender: Int?=null,
 )

@@ -2,7 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.FirebaseChattingApplication" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+         <item name="colorPrimary">@color/purple_color</item>
+        <item name="colorSecondary">@color/pink_color</item>
+        <item name="android:statusBarColor">@color/pink_color</item>
     </style>
 
     <style name="Theme.FirebaseChattingApplication" parent="Base.Theme.FirebaseChattingApplication" />

@@ -79,7 +79,7 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
             try {
                 val result = authenticationRepository.addUserToFirestore(user)
                 Log.d("wekjfbjhebfw", "addUserToFirestore: $result")
-                _state.value = AuthState.Success("")
+                _state.value = AuthState.Success(user.id.toString())
             } catch (e: Exception) {
                 _state.value = AuthState.Error(e.message ?: "Login failed")
             }
@@ -88,10 +88,16 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun updateOnlineStatusFlow(context: Context, isOnline: Boolean, isTyping: Boolean): Flow<AuthState> = flow {
+    fun updateOnlineStatusFlow(
+        context: Context,
+        isOnline: Boolean,
+        isTyping: Boolean,
+        lastSeen: String,
+        typingToUserId: String
+    ): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            authenticationRepository.updateOnlineStatus(context, isOnline, isTyping)
+            authenticationRepository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
             emit(AuthState.Success("Status updated."))
         } catch (e: Exception) {
             emit(AuthState.Error(e.message ?: "Failed to update status."))
@@ -166,9 +172,23 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
                 initialValue = emptyList() //initially list is empty
             )
     }
- fun getOnlineUsers(): StateFlow<List<OnlineUser>> {
+    fun getAllMessages(): StateFlow<List<Message>> {
+        // fetch the lists based on both chat ids
+        val flow = authenticationRepository.getAllMessages()
+        // convert the resulting Flow into a StateFlow
+        return flow
+            .catch { e ->
+                Log.e("ChatFlow", "Error combining messages: ${e.message}", e)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList() //initially list is empty
+            )
+    }
+ fun getOnlineUsers(context: Context): StateFlow<List<OnlineUser>> {
 
-        val flow = authenticationRepository.getOnlineUsers()
+        val flow = authenticationRepository.getOnlineUsers(context)
         return flow
             .catch { e ->
                 Log.e("ChatFlow", "Error: ${e.message}", e)

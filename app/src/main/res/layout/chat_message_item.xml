@@ -6,6 +6,17 @@
     android:orientation="vertical"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/dateTV"
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_5sdp"
+        android:fontFamily="sans-serif"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@color/black"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"/>
+
     <RelativeLayout
         android:id="@+id/receivedLayout"
         android:layout_width="wrap_content"
@@ -19,14 +30,12 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/person"
-            app:tint="@color/white" />
+           />
 
         <TextView
             android:id="@+id/receivedTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello"
             android:fontFamily="sans-serif"
             android:layout_marginTop="3dp"
             android:layout_toRightOf="@id/senderDP"
@@ -37,12 +46,11 @@
             android:id="@+id/receivedName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="by hjfsfj"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/receivedTV"
             android:layout_toRightOf="@id/senderDP"
             android:textColor="@color/white"
-            android:textSize="@dimen/_10ssp"/>
+            android:textSize="@dimen/_8ssp"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -57,9 +65,7 @@
             android:id="@+id/myDP"
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
-            android:layout_toRightOf="@id/msgs"
-            android:src="@drawable/person"
-            app:tint="@color/white" />
+            android:layout_toEndOf="@id/msgs" />
 
         <LinearLayout
             android:id="@+id/msgs"
@@ -71,7 +77,6 @@
                 android:id="@+id/sentTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hello"
                 android:layout_marginTop="3dp"
                 android:fontFamily="sans-serif"
                 android:layout_marginVertical="3dp"
@@ -82,11 +87,10 @@
                 android:id="@+id/senderName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="by hjfsfj"
                 android:fontFamily="sans-serif-light"
                 android:layout_below="@id/sentTV"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_10ssp"/>
+                android:textSize="@dimen/_8ssp"/>
         </LinearLayout>
 
 

@@ -1,24 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingBottom="@dimen/_15sdp"
+    android:paddingTop="@dimen/_8sdp"
+    android:paddingHorizontal="@dimen/_12sdp"
+    android:background="@drawable/maroon_black_gradient_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <TextView
+        android:id="@+id/titleTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Username"/>
+        android:layout_centerHorizontal="true"
+        android:fontFamily="sans-serif-black"
+        android:textColor="@color/white"
+        android:text="@string/chats"
+        android:textSize="@dimen/_14ssp"/>
+
+    <TextView
+        android:id="@+id/noMessagesTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_chats_found"
+        android:layout_centerInParent="true"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_10ssp"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatsRV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/chat_item"
+        android:layout_below="@id/titleTV"
+        android:layout_marginTop="@dimen/_15sdp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
 
     </androidx.recyclerview.widget.RecyclerView>
 
-</LinearLayout>
+</RelativeLayout>

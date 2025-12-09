@@ -3,25 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/maroon_black_gradient_bg"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@drawable/maroon_black_gradient_bg">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
 
         <TextView
+            android:id="@+id/titleTV"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_25sdp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center_vertical"
             android:text="@string/create_your_naccount"
             android:textColor="@color/white"
+            android:paddingVertical="@dimen/_20sdp"
             android:textSize="@dimen/_18ssp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.13"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,9 +32,8 @@
             android:background="@drawable/base_layout_bg"
             android:orientation="vertical"
             android:padding="@dimen/_25sdp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.85"
+            app:layout_constraintTop_toBottomOf="@id/titleTV"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -48,25 +48,47 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:hintTextColor="@color/hint_gray"
-                app:boxBackgroundMode="filled"
-                app:hintEnabled="false"
-                app:boxStrokeColor="@color/hint_gray"
+                android:textColorHint="@color/hint_gray"
                 app:boxBackgroundColor="@color/white"
-                android:textColorHint="@color/hint_gray">
+                app:boxBackgroundMode="filled"
+                app:boxStrokeColor="@color/hint_gray"
+                app:hintEnabled="false"
+                app:hintTextColor="@color/hint_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nameET"
+                    style="@style/styleTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_name"
                     android:background="@null"
-                    style="@style/styleTextInputEditText"
                     android:fontFamily="sans-serif"
+                    android:hint="@string/enter_name"
                     android:inputType="textPersonName" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Gender"
+                android:textColor="@color/pink_color"
+                android:textSize="@dimen/_14ssp" />
+
+            <CheckBox
+                android:id="@+id/maleCB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/purple_color"
+                android:text="Male" />
+
+            <CheckBox
+                android:id="@+id/femaleCB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/purple_color"
+                android:text="Female" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -80,21 +102,21 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:hintTextColor="@color/hint_gray"
-                app:boxBackgroundMode="filled"
-                app:hintEnabled="false"
-                app:boxStrokeColor="@color/hint_gray"
+                android:textColorHint="@color/hint_gray"
                 app:boxBackgroundColor="@color/white"
-                android:textColorHint="@color/hint_gray">
+                app:boxBackgroundMode="filled"
+                app:boxStrokeColor="@color/hint_gray"
+                app:hintEnabled="false"
+                app:hintTextColor="@color/hint_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailET"
+                    style="@style/styleTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_email"
                     android:background="@null"
-                    style="@style/styleTextInputEditText"
                     android:fontFamily="sans-serif"
+                    android:hint="@string/enter_email"
                     android:inputType="textEmailAddress" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -111,22 +133,22 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:hintTextColor="@color/hint_gray"
-                app:boxBackgroundMode="filled"
-                app:hintEnabled="false"
-                app:boxStrokeColor="@color/hint_gray"
-                app:boxBackgroundColor="@color/white"
                 android:textColorHint="@color/hint_gray"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="filled"
+                app:boxStrokeColor="@color/hint_gray"
+                app:hintEnabled="false"
+                app:hintTextColor="@color/hint_gray"
                 app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordET"
+                    style="@style/styleTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_password"
                     android:background="@null"
-                    style="@style/styleTextInputEditText"
                     android:fontFamily="sans-serif"
+                    android:hint="@string/enter_password"
                     android:inputType="textPassword" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -143,12 +165,12 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:hintTextColor="@color/hint_gray"
-                app:boxBackgroundMode="filled"
-                app:hintEnabled="false"
-                app:boxStrokeColor="@color/hint_gray"
-                app:boxBackgroundColor="@color/white"
                 android:textColorHint="@color/hint_gray"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="filled"
+                app:boxStrokeColor="@color/hint_gray"
+                app:hintEnabled="false"
+                app:hintTextColor="@color/hint_gray"
                 app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -156,9 +178,9 @@
                     style="@style/styleTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_confirm_password"
                     android:background="@null"
                     android:fontFamily="sans-serif"
+                    android:hint="@string/enter_confirm_password"
                     android:inputType="textPassword" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -181,20 +203,20 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="sans-serif-light"
-                android:textSize="@dimen/_11ssp"
                 android:text="@string/already_have_an_account"
-                android:textColor="@color/light_gray" />
+                android:textColor="@color/light_gray"
+                android:textSize="@dimen/_11ssp" />
 
             <TextView
                 android:id="@+id/loginTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/_2sdp"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/login"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:textSize="@dimen/_13ssp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="@dimen/_13ssp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

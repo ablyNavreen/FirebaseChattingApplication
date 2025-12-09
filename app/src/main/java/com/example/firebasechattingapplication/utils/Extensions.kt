@@ -5,16 +5,14 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Build
-import android.text.InputType
 import android.util.Patterns
 import android.view.View
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -90,39 +88,72 @@ fun String.toTimestampMillis(): Long {
 
 // Extension function to convert Milliseconds to relative, local time
 fun Long.toLastSeenTime(context: Context): String {
-
-    // This part of the function automatically uses the DEVICE'S LOCAL TIMEZONE
-    // for comparison and formatting, which is exactly what you want.
-
     val receivedCalendar = Calendar.getInstance().apply { timeInMillis = this@toLastSeenTime }
     val nowCalendar = Calendar.getInstance()
-
-    // Comparison is done using local time fields
     val diffDays = abs(nowCalendar.get(Calendar.DAY_OF_YEAR) - receivedCalendar.get(Calendar.DAY_OF_YEAR))
     val diffYears = abs(nowCalendar.get(Calendar.YEAR) - receivedCalendar.get(Calendar.YEAR))
-
-    // Format the time part (e.g., "11:00 PM") using the device's local time zone
     val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
     val formattedTime = timeFormat.format(receivedCalendar.time)
-
     val lastSeenPrefix = "Last seen "
-
     return when {
-        // --- Today ---
         diffDays == 0 && diffYears == 0 -> {
             "$lastSeenPrefix today at $formattedTime"
         }
-
-        // --- Yesterday ---
         diffDays == 1 && diffYears == 0 -> {
             "$lastSeenPrefix yesterday at $formattedTime"
         }
-
-        // --- Older Date (Within the year) ---
         else -> {
             val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
             val formattedDate = dateFormat.format(receivedCalendar.time)
             "$lastSeenPrefix on $formattedDate at $formattedTime"
         }
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatIsoDateTime(isoString: String?): Pair<String, String> {
+    val instant = Instant.parse(isoString)
+    val localDateTime = instant.atZone(ZoneId.systemDefault())
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        .withLocale(Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
+        .withLocale(Locale.getDefault())
+    val formattedDate = localDateTime.format(dateFormatter)
+    val formattedTime = localDateTime.format(timeFormatter)
+    return Pair(formattedDate, formattedTime)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun String.toChatDate(
+    inputFormatPattern: String = "dd-MM-yyyy",
+    outputFormatPattern: String = "d MMM, yyyy"
+): String {
+    try {
+        val inputFormatter = DateTimeFormatter.ofPattern(inputFormatPattern, Locale.getDefault())
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
+        val inputDate = LocalDate.parse(this, inputFormatter)
+        return when (inputDate) {
+            today -> "Today"
+            yesterday -> "Yesterday"
+            else -> {
+                val outputFormatter = DateTimeFormatter.ofPattern(outputFormatPattern, Locale.getDefault())
+                inputDate.format(outputFormatter)
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return this
+    }
+}
+
+
+fun String.extractFirstName(): String? {
+    val words = this.split(" ")
+    return if (words.isNotEmpty()) {
+        words[0]
+    } else {
+        null
     }
 }

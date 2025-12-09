@@ -1,50 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:background="@drawable/maroon_black_gradient_bg"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/_15sdp"
+        android:layout_marginHorizontal="@dimen/_15sdp"
+        android:orientation="vertical">
+
 
     <TextView
+        android:id="@+id/activeUsersTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Active Users"
+        android:text="@string/active_users"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-black"
         android:layout_marginVertical="@dimen/_15sdp"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_15ssp"
         />
 
+    <TextView
+        android:id="@+id/noUsersTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_users_found"
+        android:layout_marginVertical="@dimen/_20sdp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/activeUsersRV"
         android:orientation="horizontal"
-        android:layout_marginHorizontal="@dimen/_15sdp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/active_user_item"/>
  <TextView
         android:id="@+id/userIdTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Users List"
+        android:layout_gravity="start"
+        android:text="@string/users_list"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-black"
         android:layout_marginVertical="@dimen/_15sdp"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_15ssp"
         />
+    <TextView
+        android:id="@+id/noUsersTV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_users_found"
+        android:visibility="gone"
+        android:layout_marginVertical="@dimen/_20sdp"
+        android:layout_gravity="center_horizontal"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/usersRV"
-        android:layout_marginHorizontal="@dimen/_15sdp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/user_list_item"/>
 
 
 </LinearLayout>
+</androidx.core.widget.NestedScrollView>

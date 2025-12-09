@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         app:menu="@menu/nav_menu"
         app:itemIconTint="@color/black"
-        android:background="@color/pink_color"
+        android:background="@color/white"
+        app:itemRippleColor="@android:color/transparent"
         app:itemTextColor="@color/black"
         android:layout_alignParentBottom="true"/>
 

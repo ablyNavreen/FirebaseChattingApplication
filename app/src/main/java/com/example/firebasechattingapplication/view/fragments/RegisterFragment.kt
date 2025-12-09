@@ -15,6 +15,7 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentRegisterBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.User
+import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.isValidEmail
@@ -61,7 +62,11 @@ class RegisterFragment : Fragment() {
             if (nameET.text.toString().isEmpty()) {
                 showToast("Please enter name")
                 return false
-            } else if (emailET.text.toString().trim().isEmpty()) {
+            }  else if (!maleCB.isChecked && !femaleCB.isChecked) {
+                showToast("Please select gender")
+                return false
+            }
+            else if (emailET.text.toString().trim().isEmpty()) {
                 showToast("Please enter email address")
                 return false
             } else if (! isValidEmail(emailET.text.toString())) {
@@ -112,7 +117,8 @@ class RegisterFragment : Fragment() {
     }
 
     private fun addUserToFirestore(userId: String) {
-        viewModel.addUserToFirestore(User(id = userId, name = binding.nameET.text.toString(), email = binding.emailET.text.toString()))
+        val  gender = if (binding.maleCB.isChecked) 0 else 1
+        viewModel.addUserToFirestore(User(id = userId, name = binding.nameET.text.toString(), email = binding.emailET.text.toString(), gender, binding.passwordET.text.toString().trim()))
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {
@@ -127,6 +133,7 @@ class RegisterFragment : Fragment() {
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     Log.d("wekjfbjhebfw", "addUserToFirestore: Success ${state}")
+                    SpUtils.saveString(requireContext(), Constants.USER_ID, userId)
                     findNavController().navigate(R.id.homeFragment)
                 }
             }

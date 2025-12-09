@@ -3,8 +3,9 @@
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/baseLayout"
+    app:cardMaxElevation="@dimen/_10sdp"
     app:cardCornerRadius="@dimen/_8sdp"
-    android:layout_marginVertical="@dimen/_5sdp"
+    android:layout_marginVertical="@dimen/_8sdp"
     app:cardBackgroundColor="@color/white"
     android:layout_height="wrap_content">
 
@@ -29,27 +30,27 @@
             android:fontFamily="sans-serif-medium"
             android:layout_toRightOf="@id/userIV"
             />
+
         <TextView
             android:id="@+id/nameTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Name"
-            android:textSize="@dimen/_13ssp"
-            android:fontFamily="sans-serif-medium"
             android:layout_below="@id/idTV"
             android:layout_toRightOf="@id/userIV"
-            />
+            android:fontFamily="sans-serif-medium"
+            android:text="User Name"
+            android:textSize="@dimen/_13ssp" />
+
         <TextView
             android:id="@+id/emailTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User@gmail.com"
             android:layout_below="@id/nameTV"
-            android:layout_marginTop="@dimen/_3sdp"
-            android:textSize="@dimen/_12ssp"
-            android:fontFamily="sans-serif"
+            android:layout_marginTop="@dimen/_2sdp"
             android:layout_toRightOf="@id/userIV"
-            />
+            android:fontFamily="sans-serif"
+            android:text="User@gmail.com"
+            android:textSize="@dimen/_12ssp" />
 
     </RelativeLayout>
 

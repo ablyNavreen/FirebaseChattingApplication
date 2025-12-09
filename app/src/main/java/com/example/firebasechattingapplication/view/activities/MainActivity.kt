@@ -16,10 +16,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ActivityMainBinding
 import com.example.firebasechattingapplication.model.AuthState
-import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
-import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
-import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
@@ -56,7 +53,16 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
+        Log.d("wekjfbjhebfw", "onStop: of main")
+//        updateOnlineStatus(false)
         super.onStop()
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPause() {
+        super.onPause()
+        Log.d("wekjfbjhebfw", "onPause: of onPause")
         updateOnlineStatus(false)
     }
 
@@ -157,9 +163,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateOnlineStatus(isOnline: Boolean) {
+    private fun updateOnlineStatus(isOnline: Boolean,) {
         lifecycleScope.launch {
-            viewModel.updateOnlineStatusFlow(this@MainActivity, isOnline, false)
+            viewModel.updateOnlineStatusFlow(this@MainActivity, isOnline, false, getCurrentUtcDateTimeModern(), "")
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {

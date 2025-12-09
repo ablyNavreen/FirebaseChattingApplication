@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:paddingHorizontal="@dimen/_12sdp"
+    android:layout_marginVertical="@dimen/_6sdp"
     android:layout_height="wrap_content"
+    android:id="@+id/baseLayout"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
         android:id="@+id/profilePicIV"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
         android:layout_alignParentStart="true"
        />
     <TextView
@@ -16,7 +20,11 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/profilePicIV"
         android:layout_toStartOf="@id/dateTV"
-        android:text="User name"/>
+        android:fontFamily="sans-serif-medium"
+        android:textSize="@dimen/_13ssp"
+        android:singleLine="true"
+        android:textColor="@color/white"
+       />
     <TextView
         android:id="@+id/messageTV"
         android:layout_width="match_parent"
@@ -24,12 +32,25 @@
         android:layout_toEndOf="@id/profilePicIV"
         android:layout_toStartOf="@id/dateTV"
         android:layout_below="@id/usernameTV"
-        android:text="message"/>
+        android:textColor="@color/white"
+        android:singleLine="true"
+        android:fontFamily="sans-serif"
+        android:textSize="@dimen/_12ssp"
+      />
     <TextView
         android:id="@+id/dateTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="message"/>
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-light"
+        android:textSize="@dimen/_8ssp"
+       />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_1sdp"
+        android:background="@color/white"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_below="@id/profilePicIV"/>
 </RelativeLayout>

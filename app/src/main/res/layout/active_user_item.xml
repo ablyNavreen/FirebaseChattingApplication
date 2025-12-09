@@ -6,27 +6,44 @@
     app:cardCornerRadius="@dimen/_8sdp"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:layout_marginHorizontal="@dimen/_5sdp"
+    android:layout_marginHorizontal="@dimen/_12sdp"
     android:layout_marginVertical="@dimen/_5sdp"
     app:cardBackgroundColor="@color/white"
     android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/userIV"
-            android:layout_width="@dimen/_45sdp"
-            android:layout_height="@dimen/_45sdp"
-            android:src="@drawable/baseline_account_circle_24"
-            app:tint="@color/white" />
+        <RelativeLayout
+            android:id="@+id/profilePicLayout"
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp">
+                <ImageView
+                    android:id="@+id/userIV"
+                    android:layout_width="@dimen/_55sdp"
+                    android:layout_height="@dimen/_55sdp"
+                    android:padding="@dimen/_1sdp"
+                    android:background="@drawable/white_circle_sctroke"
+                    />
+
+                <ImageView
+                    android:layout_width="@dimen/_8ssp"
+                    android:layout_height="@dimen/_8ssp"
+                    android:padding="@dimen/_1sdp"
+                    android:layout_alignParentEnd="true"
+                    android:backgroundTint="@color/green"
+                    android:background="@drawable/white_circle_sctroke"
+                    />
+
+        </RelativeLayout>
+
 
         <TextView
             android:id="@+id/nameTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Name"
-            android:textSize="@dimen/_13ssp"
-            android:fontFamily="sans-serif-medium"
             android:layout_below="@id/idTV"
-            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/_3sdp"
             android:layout_toRightOf="@id/userIV"
-            />
+            android:fontFamily="sans-serif"
+            android:text="User Name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_12ssp" />
 </LinearLayout>

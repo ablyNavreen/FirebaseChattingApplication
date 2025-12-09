@@ -1,23 +1,28 @@
 package com.example.firebasechattingapplication.view.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentSettingsBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.utils.ProgressIndicator
+import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.showYesNoDialog
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import kotlin.getValue
 
 @AndroidEntryPoint
@@ -41,10 +46,11 @@ class SettingsFragment : Fragment() {
         setUpClickListeners()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setUpClickListeners() {
             binding.logoutLayout.setOnClickListener {
                 showYesNoDialog(requireActivity(),"Logout", "Are you sure you want to logout?", "Logout", "Cancel", onPositiveClick = {
-                    logoutUser()
+                    updateOnlineStatus(false)
                 })
             }
             binding.profileLayout.setOnClickListener {
@@ -52,7 +58,41 @@ class SettingsFragment : Fragment() {
             }
 
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateOnlineStatus(isOnline: Boolean) {
+        lifecycleScope.launch {
+            viewModel.updateOnlineStatusFlow(
+                requireContext(),
+                isOnline,
+                false,
+                getCurrentUtcDateTimeModern(),""
+            )
+                .collect { state ->
+                    when (state) {
+                        is AuthState.Error -> {
+                            ProgressIndicator.hide()
+                            Log.d(
+                                "wekjfbjhebfw",
+                                "updateOnlineStatusFlow  Error : main   $isOnline"
+                            )
+                            showToast(state.message)
+                        }
 
+                        AuthState.Loading -> {
+                            ProgressIndicator.show(requireContext())
+                        }
+
+                        is AuthState.Success -> {
+                            Log.d(
+                                "wekjfbjhebfw",
+                                "updateOnlineStatusFlow  Success : main   $isOnline"
+                            )
+                            logoutUser()
+                        }
+                    }
+                }
+        }
+    }
     private fun logoutUser() {
         viewModel.logoutUser()
         viewModel.authState.observe(viewLifecycleOwner) { state ->
