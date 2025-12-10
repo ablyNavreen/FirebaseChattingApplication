@@ -39,6 +39,7 @@
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif-medium"
             android:text="User Name"
+            android:textColor="@color/black"
             android:textSize="@dimen/_13ssp" />
 
         <TextView
@@ -49,6 +50,7 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif"
+            android:textColor="@color/black"
             android:text="User@gmail.com"
             android:textSize="@dimen/_12ssp" />
 

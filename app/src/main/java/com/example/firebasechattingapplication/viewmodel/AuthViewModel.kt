@@ -12,7 +12,7 @@ import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
-import com.example.firebasechattingapplication.model.repository.AuthenticationRepository
+import com.example.firebasechattingapplication.model.repository.FirebaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,24 +25,42 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val authenticationRepository: AuthenticationRepository) :
+class AuthViewModel @Inject constructor(private val repository: FirebaseRepository) :
     ViewModel() {
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Loading)
     val authState: LiveData<AuthState> = _authState
 
 
-    private val _state = MutableLiveData<AuthState>(AuthState.Loading)
-    val state: LiveData<AuthState> = _state
+//    private val _state = MutableLiveData<AuthState>(AuthState.Loading)
+//    val state: LiveData<AuthState> = _state
+
+    fun addUserToFirestore(user: User) {
+//        _authState.value = AuthState.Loading
+        viewModelScope.launch {
+            try {
+                val result = repository.addUserToFirestore(user)
+                Log.d("wekjfbjhebfw", "addUserToFirestore: $result")
+                _authState.value = AuthState.Success(user.id.toString())
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Login failed")
+            }
+        }
+    }
 
 
-    fun registerUser(email: String, password: String) {
+    fun registerUser(userData: User) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = authenticationRepository.registerUser(email, password)
-                Log.d("wekjfbjhebfw", "registerUser: ${result?.user}")
-                _authState.value = AuthState.Success(result?.user?.uid ?: "")
+                //pass email & password to repo method for registeration
+                val result = repository.registerUser(userData.email.toString(), userData.password.toString())
+                val user =User( name = userData.name.toString(),
+                    email = userData.email, gender = userData.gender,
+                    password = userData.password,
+                    id = result?.user?.uid?:"")
+                //after sucessfull registeration save user info to firestore
+                addUserToFirestore(user)
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Registration failed")
             }
@@ -51,7 +69,7 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
 
     suspend fun getUserData(): List<User>? {
         return try {
-            val snapshot = authenticationRepository.getUserData()
+            val snapshot = repository.getUserData()
             snapshot?.documents?.mapNotNull { document ->
                 document.toObject(User::class.java)
             }
@@ -65,23 +83,11 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = authenticationRepository.loginUser(email, password)
+                //hit repo method to check user login
+                val result = repository.loginUser(email, password)
                 _authState.value = AuthState.Success(result?.user?.uid ?: "")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
-            }
-        }
-    }
-
-    fun addUserToFirestore(user: User) {
-        _state.value = AuthState.Loading
-        viewModelScope.launch {
-            try {
-                val result = authenticationRepository.addUserToFirestore(user)
-                Log.d("wekjfbjhebfw", "addUserToFirestore: $result")
-                _state.value = AuthState.Success(user.id.toString())
-            } catch (e: Exception) {
-                _state.value = AuthState.Error(e.message ?: "Login failed")
             }
         }
     }
@@ -97,7 +103,7 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
     ): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            authenticationRepository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
+            repository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
             emit(AuthState.Success("Status updated."))
         } catch (e: Exception) {
             emit(AuthState.Error(e.message ?: "Failed to update status."))
@@ -105,14 +111,14 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
     }
 
     fun sendMessageToUser(message: Message) {
-        _state.value = AuthState.Loading
+        _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = authenticationRepository.sendMessageToUser(message)
+                val result = repository.sendMessageToUser(message)
                 Log.d("wekjfbjhebfw", "sendMessageToUser: $result")
-                _state.value = AuthState.Success("")
+                _authState.value = AuthState.Success("")
             } catch (e: Exception) {
-                _state.value = AuthState.Error(e.message ?: "Login failed")
+                _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
         }
     }
@@ -122,9 +128,9 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = authenticationRepository.isUserLogged()
+                val result = repository.isUserLogged()
                 if (result != null)
-                    _authState.value = AuthState.Success(result?.uid ?: "")
+                    _authState.value = AuthState.Success(result.uid?: "")
                 else
                     _authState.value = AuthState.Error("Login Failed")
             } catch (e: java.lang.Exception) {
@@ -137,7 +143,7 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = authenticationRepository.logoutUser()
+                val result = repository.logoutUser()
                 if (result != null)
                     _authState.value = AuthState.Success("Logged out successfully")
                 else
@@ -152,8 +158,8 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
     // Expose the messages as a StateFlow for the UI
     fun getMessages(chatId: String, chatId2: String): StateFlow<List<Message>> {
         // fetch the lists based on both chat ids
-        val flow1 = authenticationRepository.getRealTimeMessages(chatId)
-        val flow2 = authenticationRepository.getRealTimeMessages(chatId2)
+        val flow1 = repository.getRealTimeMessages(chatId)
+        val flow2 = repository.getRealTimeMessages(chatId2)
         //combine the flows
         val combinedFlow = combine(flow1, flow2) { messages1, messages2 ->
             //whenerver there is change in list by flow1 or flow2 -> we get new list
@@ -174,7 +180,7 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
     }
     fun getAllMessages(): StateFlow<List<Message>> {
         // fetch the lists based on both chat ids
-        val flow = authenticationRepository.getAllMessages()
+        val flow = repository.getAllMessages()
         // convert the resulting Flow into a StateFlow
         return flow
             .catch { e ->
@@ -188,15 +194,15 @@ class AuthViewModel @Inject constructor(private val authenticationRepository: Au
     }
  fun getOnlineUsers(context: Context): StateFlow<List<OnlineUser>> {
 
-        val flow = authenticationRepository.getOnlineUsers(context)
+        val flow = repository.getOnlineUsers(context)
         return flow
             .catch { e ->
                 Log.e("ChatFlow", "Error: ${e.message}", e)
             }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList() //initially list is empty
+            .stateIn(  //coverts to a hot StateFlow
+                scope = viewModelScope,   //resists configuration changes
+                started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec othweise shut down
+                initialValue = emptyList() //initially list is empty to eliminate null
             )
     }
 

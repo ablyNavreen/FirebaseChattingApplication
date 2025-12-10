@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.flow
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
-    private val authViewModel : AuthViewModel by viewModels()
+    private val authViewModel : AuthViewModel by viewModels()  //get viewmodel instance
     private lateinit var binding: FragmentLoginBinding
 
     override fun onCreateView(
@@ -37,6 +37,7 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //handle the click listeners logic on views
         setUpClickListeners()
     }
 
@@ -47,7 +48,7 @@ class LoginFragment : Fragment() {
                 findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
             }
             loginBT.setOnClickListener {
-                //login user
+                //start login process
                 if (validateData())
                     hitUserLogin()
             }
@@ -55,6 +56,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun hitUserLogin() {
+        //hit user login using firebase auth
         authViewModel.loginUser(binding.emailET.text.toString().trim(), binding.passwordET.text.toString().trim())
         authViewModel.authState.observe(viewLifecycleOwner){it->
             when(it){
@@ -67,6 +69,7 @@ class LoginFragment : Fragment() {
                 }
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
+                    //save user id and navigate to home
                     SpUtils.saveString(requireContext(), Constants.USER_ID, it.userId)
                     findNavController().navigate(R.id.homeFragment)
                 }
@@ -74,7 +77,7 @@ class LoginFragment : Fragment() {
         }
     }
 
-    fun validateData() : Boolean {
+    fun validateData() : Boolean {  //checks for login validations
         binding.apply {
             if (emailET.text.toString().trim().isEmpty()) {
                 showToast("Email can't be empty")

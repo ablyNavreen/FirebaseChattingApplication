@@ -145,7 +145,7 @@ class ChatFragment : Fragment() {
                     gender =  SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt())
                 Log.d("tyry4utyiuyui", "setUpClickListeners: $message")
                 authViewModel.sendMessageToUser(message)
-                authViewModel.state.observe(viewLifecycleOwner) { state ->
+                authViewModel.authState.observe(viewLifecycleOwner) { state ->
                     when (state) {
                         is AuthState.Error -> {
                             ProgressIndicator.hide()

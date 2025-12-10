@@ -32,7 +32,7 @@ object ProgressIndicator {
 
     fun hide() {
         if (dialog != null) {
-            dialog!!.dismiss()
+            dialog?.dismiss()
             dialog = null
         }
     }

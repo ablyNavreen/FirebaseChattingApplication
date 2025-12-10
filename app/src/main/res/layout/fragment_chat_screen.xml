@@ -5,15 +5,23 @@
         android:layout_width="match_parent"
     android:paddingBottom="@dimen/_15sdp"
     android:background="@color/white"
-    android:paddingTop="@dimen/_8sdp"
-    android:paddingHorizontal="@dimen/_12sdp"
         android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/backIV"
-        android:layout_width="@dimen/_25sdp"
-        android:layout_height="@dimen/_25sdp"
-        android:src="@drawable/baseline_arrow_back_24"/>
+    <RelativeLayout
+        android:id="@+id/topBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:background="@drawable/maroon_black_gradient_bg"
+        android:paddingTop="@dimen/_30sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:layout_alignParentTop="true">
+        <ImageView
+            android:id="@+id/backIV"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/tv"
@@ -23,22 +31,25 @@
             android:textAlignment="center"
             android:fontFamily="sans-serif-black"
             android:layout_toRightOf="@+id/backIV"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="@dimen/_14ssp"/>
+
+
      <TextView
             android:id="@+id/lastSeenTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
          android:layout_below="@id/tv"
             android:textSize="@dimen/_10ssp"/>
-
+    </RelativeLayout>
     <TextView
         android:id="@+id/noMessagesTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="No messages found!"
         android:layout_centerInParent="true"
         android:fontFamily="sans-serif-light"
@@ -50,7 +61,8 @@
             android:id="@+id/messagesRV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lastSeenTV"
+            android:paddingHorizontal="@dimen/_12sdp"
+            android:layout_below="@id/topBarLayout"
             tools:listitem="@layout/chat_message_item"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:layout_above="@id/sendMsgLayout">

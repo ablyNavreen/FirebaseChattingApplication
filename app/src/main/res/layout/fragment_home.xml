@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/maroon_black_gradient_bg"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:fillViewport="true">
 
     <LinearLayout
@@ -22,27 +23,33 @@
         android:text="@string/active_users"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-black"
-        android:layout_marginVertical="@dimen/_15sdp"
+        android:layout_marginVertical="@dimen/_30sdp"
         android:textSize="@dimen/_15ssp"
         />
 
-    <TextView
-        android:id="@+id/noUsersTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_users_found"
-        android:layout_marginVertical="@dimen/_20sdp"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/white"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/activeUsersRV"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/active_user_item"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/activeUsersRV"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/active_user_item"/>
+            <TextView
+                android:id="@+id/noUsersTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_users_found"
+                android:layout_marginVertical="@dimen/_20sdp"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/white"/>
+        </RelativeLayout>
+
  <TextView
         android:id="@+id/userIdTV"
         android:layout_width="wrap_content"

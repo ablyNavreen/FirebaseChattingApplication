@@ -26,7 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class RegisterFragment : Fragment() {
     private lateinit var binding: FragmentRegisterBinding
-    private val viewModel: AuthViewModel by viewModels()
+    private val viewModel: AuthViewModel by viewModels()  //get viewmodel instance
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +40,7 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //handle the click listeners logic on views
         setUpClickListeners()
     }
 
@@ -50,14 +51,15 @@ class RegisterFragment : Fragment() {
                 findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
             }
             registerBT.setOnClickListener {
-                if (validateRegisteration())
+                //start registeration process
+                if (validateRegister())
                     hitRegisterUser()
             }
         }
     }
 
-    private fun validateRegisteration(): Boolean {
-        //check conditons for null or empty input by the user
+    private fun validateRegister(): Boolean {
+        //checks register validations
         binding.apply {
             if (nameET.text.toString().isEmpty()) {
                 showToast("Please enter name")
@@ -86,7 +88,6 @@ class RegisterFragment : Fragment() {
                 showToast("Password and confirm password are not same.")
                 return false
             } else {
-                //else ->register the usr
                 return true
             }
         }
@@ -94,46 +95,25 @@ class RegisterFragment : Fragment() {
     }
 
     private fun hitRegisterUser() {
-        viewModel.registerUser(binding.emailET.text.toString(), binding.passwordET.text.toString())
+        val  gender = if (binding.maleCB.isChecked) 0 else 1  //0-male, 1-female
+        val user =User( name = binding.nameET.text.toString(),
+            email = binding.emailET.text.toString(),
+            gender = gender,
+            password = binding.passwordET.text.toString().trim())
+        //hit register using firebase
+        viewModel.registerUser(user)  //data is passed by putting into model class directly
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {
                     ProgressIndicator.hide()
-                    Log.d("wekjfbjhebfw", "hitRegisterUser: Error ${state.message}")
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                }
-
-                AuthState.Loading -> {
-                    Log.d("wekjfbjhebfw", "hitRegisterUser: Loading ${state}")
-                    ProgressIndicator.show(requireContext())
-                }
-
-                is AuthState.Success -> {
-                    Log.d("wekjfbjhebfw", "hitRegisterUser: Success ${state}")
-                    addUserToFirestore(state.userId)
-                }
-            }
-        }
-    }
-
-    private fun addUserToFirestore(userId: String) {
-        val  gender = if (binding.maleCB.isChecked) 0 else 1
-        viewModel.addUserToFirestore(User(id = userId, name = binding.nameET.text.toString(), email = binding.emailET.text.toString(), gender, binding.passwordET.text.toString().trim()))
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is AuthState.Error -> {
-                    ProgressIndicator.hide()
-                    Log.d("wekjfbjhebfw", "addUserToFirestore: Error ${state.message}")
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    showToast( state.message)
                 }
                 AuthState.Loading -> {
-                    Log.d("wekjfbjhebfw", "addUserToFirestore: Loading ${state}")
                     ProgressIndicator.show(requireContext())
                 }
                 is AuthState.Success -> {
-                    ProgressIndicator.hide()
-                    Log.d("wekjfbjhebfw", "addUserToFirestore: Success ${state}")
-                    SpUtils.saveString(requireContext(), Constants.USER_ID, userId)
+                    //save user id and move to home
+                    SpUtils.saveString(requireContext(), Constants.USER_ID, state.userId)
                     findNavController().navigate(R.id.homeFragment)
                 }
             }

@@ -22,10 +22,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:menu="@menu/nav_menu"
-        app:itemIconTint="@color/black"
-        android:background="@color/white"
+        app:itemIconTint="@color/bottom_nav_color_state"
+        app:itemTextColor="@color/bottom_nav_color_state"
+        android:background="#F0F0F0"
         app:itemRippleColor="@android:color/transparent"
-        app:itemTextColor="@color/black"
+        style="@style/BottomNavNoSelectionBackground"
         android:layout_alignParentBottom="true"/>
 
 

@@ -25,7 +25,7 @@ import javax.inject.Singleton
 
 
 @Singleton
-class AuthenticationRepository @Inject constructor(
+class FirebaseRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firebaseFirestore: FirebaseFirestore
 ) {
@@ -39,17 +39,10 @@ class AuthenticationRepository @Inject constructor(
         return firebaseFirestore.collection(Constants.USERS_COLLECTION).get().await()
     }
 
-    suspend fun getMessages(chatId: String): QuerySnapshot? {
-        return firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
-            .document(chatId)
-            .collection(Constants.MESSAGES_SUB_COLLECTION)
-            .get().await()
-    }
-
     suspend fun loginUser(email: String, password: String): AuthResult? {
-        return firebaseAuth.signInWithEmailAndPassword(email, password).await()
-        //need of await -> viewmodel thuoght the result is immediately available and was returning error Task is not complete yet.
-        //await is added to pause the execution of coroutine until we gt the result
+        return firebaseAuth.signInWithEmailAndPassword(email, password)  //pass the email & password to check the user login if account exists or not
+            .await()  //pause the coroutine till we get result
+
     }
 
     fun isUserLogged(): FirebaseUser? {
@@ -79,6 +72,7 @@ class AuthenticationRepository @Inject constructor(
         typingToUserId: String
     ) {
         val userId = SpUtils.getString(context, Constants.USER_ID)
+        Log.d("ekjfwhkjwehfw", "userId: $userId")
         if (userId.isNullOrEmpty()) {
             Log.e("wekjfbjhebfw", "User ID is null or empty. Cannot update status.")
             return
@@ -89,7 +83,7 @@ class AuthenticationRepository @Inject constructor(
 
             documentRef.update("lastSeen", lastSeen).await()
                 documentRef.update("typing", isTyping).await()
-                documentRef.update("typingToUserId", typingToUserId).await()
+                   documentRef.update("typingToUserId", typingToUserId).await()
 
         } catch (e: Exception) {
             if (e.message?.contains("NOT_FOUND") == true) {
@@ -180,36 +174,36 @@ class AuthenticationRepository @Inject constructor(
         }
     }
 
-    fun getOnlineUsers(context: Context): Flow<List<OnlineUser>> = callbackFlow {
+    fun getOnlineUsers(context: Context): Flow<List<OnlineUser>> = callbackFlow {  //flow builder
+        //code here runs when observer start observing when .collect() is called
+
+        //create query which points to the collection you want to listen
         val query = firebaseFirestore
-            .collection(ONLINE_USERS_COLLECTION)
-        // add real time snapshot Listener
+            .collection(ONLINE_USERS_COLLECTION)  //fetch data from collection -> online_users
+        // add real time snapshot Listener for live data update
         val subscription = query.addSnapshotListener { snapshot, exception ->
+            //this code block is called when there is data change
             if (exception != null) {
-                close(exception)
+                close(exception)  //terminates flow in case of exception
                 return@addSnapshotListener
             }
             if (snapshot != null && !snapshot.isEmpty) {
-                Log.d("wekjfbjhebfw", "getActiveUsers:snapshot  ${snapshot}")
-
-                //Map the QuerySnapshot to a List<Message>
+                //map the snapshot (raw data) to a list of users
                 val messages = snapshot.documents.mapNotNull { document ->
                     document.toObject(OnlineUser::class.java)
                 }
-                //end the new list to the Flow collector
+                //emit the new list to the collector
                 trySend(messages.filter {
-                    it.id != SpUtils.getString(
-                        context = context,
-                        Constants.USER_ID
-                    )
+                    //filter the list -> user doesn't see themselves in the active list
+                    it.id != SpUtils.getString(context = context, Constants.USER_ID)
                 })
             } else if (snapshot != null && snapshot.isEmpty) {
-                // Emit an empty list if the collection exists but has no documents
+                // Emit an empty list if no docs
                 trySend(emptyList())
             }
         }
         //remove the listener when the flow is cancelled or closed to prevent memory leaks
-        awaitClose {
+        awaitClose {  //called when collector stops
             subscription.remove()
         }
     }

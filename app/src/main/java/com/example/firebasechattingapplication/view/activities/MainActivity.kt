@@ -3,13 +3,14 @@ package com.example.firebasechattingapplication.view.activities
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.window.OnBackInvokedCallback
-import android.window.OnBackInvokedDispatcher
-import androidx.activity.OnBackPressedCallback
+import android.view.View
+import android.view.WindowManager
+import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -28,44 +29,43 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     lateinit var navController: NavController //nav controller
-
-    //    private var auth: FirebaseAuth? = null
     private val viewModel: AuthViewModel by viewModels()
-    private var isBackPressed = false
+    private var pressedTime: Long = 0
     private lateinit var binding: ActivityMainBinding
+    companion object{
+        var isDataLoaded = false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+      /*  window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )*/
         setUpNavHost()
-        setupBackNavigation()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onStart() {
-        super.onStart()
-        checkUserSession()
-//        updateOnlineStatus(true)
-
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onStop() {
-        Log.d("wekjfbjhebfw", "onStop: of main")
-//        updateOnlineStatus(false)
-        super.onStop()
-
+       checkUserSession()
+        onBackPressedDispatcher.addCallback(this@MainActivity) {
+            setupBackNavigation()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPause() {
         super.onPause()
-        Log.d("wekjfbjhebfw", "onPause: of onPause")
+        Log.d("ekjfwhkjwehfw", "onPause: of onPause")
         updateOnlineStatus(false)
     }
 
+    override fun onStop() {
+        super.onStop()
+        isDataLoaded = false
+        Log.d("ekjfwhkjwehfw", "onStop: of onStop")
+    }
 
     private fun checkUserSession() {
         viewModel.isUserLogged()
@@ -76,11 +76,9 @@ class MainActivity : AppCompatActivity() {
                     showToast("Session expired. Please login.")
                     navController.navigate(R.id.loginFragment)
                 }
-
                 AuthState.Loading -> {
-                    ProgressIndicator.show(this)
+                    ProgressIndicator.show(this@MainActivity)
                 }
-
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     Log.d("lfwejkfew", "AuthState: $state")
@@ -91,56 +89,29 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun setupBackNavigation() {
-        val handleBackPressLogic = {
+  private  fun setupBackNavigation() {
             val currentDestinationId = navController.currentDestination?.id
+            Log.d("wlkjkwhjekfw", "handleBackPressLogic: setupBackNavigation tiramisu")
 
             when (currentDestinationId) {
                 R.id.homeFragment -> {
-                    if (isBackPressed)
-                        finish()
+                    if (pressedTime + 2000 > System.currentTimeMillis())  finish()
                     else {
-                        isBackPressed = true
+                        pressedTime = System.currentTimeMillis();
                         showToast("Press back again to exit")
                     }
                 }
-
-                R.id.loginFragment -> {
-                    finish()
-                }
-
-                else -> {
-                    navController.popBackStack()
-                }
+                R.id.loginFragment -> finish()
+                R.id.chatsListFragment , R.id.settingsFragment -> navController.navigate(R.id.homeFragment)
+                else -> navController.popBackStack()
             }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // --- Android 13 (API 33) and above ---
-            val callback = OnBackInvokedCallback {
-                handleBackPressLogic()
-            }
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                callback
-            )
-
-        } else {
-            val callback = object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    handleBackPressLogic() // Execute the logic when the back button is pressed
-                }
-            }
-            onBackPressedDispatcher.addCallback(this, callback)
-        }
+      super.onBackPressedDispatcher.onBackPressed()
     }
 
 
-    fun setUpNavHost() {
-        val nestedNavHostFragment =
-            supportFragmentManager.findFragmentById(R.id.frameLayout) as? NavHostFragment
+   private fun setUpNavHost() {
+        val nestedNavHostFragment = supportFragmentManager.findFragmentById(R.id.frameLayout) as? NavHostFragment
         navController = nestedNavHostFragment?.navController!!
-
         binding.bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.home -> navController.navigate(R.id.homeFragment)
@@ -156,38 +127,28 @@ class MainActivity : AppCompatActivity() {
                 R.id.loginFragment, R.id.registerFragment, R.id.chatFragment -> {
                     binding.bottomNav.gone()
                 }
-
                 else -> binding.bottomNav.visible()
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateOnlineStatus(isOnline: Boolean,) {
+    private fun updateOnlineStatus(isOnline: Boolean) {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(this@MainActivity, isOnline, false, getCurrentUtcDateTimeModern(), "")
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-//                            ProgressIndicator.hide()
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Error : main   $isOnline"
-                            )
-
+                            Log.d("wekjfbjhebfw", "updateOnlineStatusFlow  Error : main   $isOnline")
+                            if (!isFinishing && !isDestroyed) ProgressIndicator.hide()
                             showToast(state.message)
                         }
-
                         AuthState.Loading -> {
-//                            ProgressIndicator.show(this@MainActivity)
+                            if (!isFinishing && !isDestroyed)  ProgressIndicator.show(this@MainActivity)
                         }
-
                         is AuthState.Success -> {
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Success : main   $isOnline"
-                            )
-//                            ProgressIndicator.hide()
+                            if (!isFinishing && !isDestroyed)  ProgressIndicator.hide()
+                            Log.d("wekjfbjhebfw", "updateOnlineStatusFlow  Success : main   $isOnline")
                         }
                     }
                 }

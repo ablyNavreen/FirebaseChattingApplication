@@ -12,16 +12,17 @@
 
 
                 <TextView
+                    android:id="@+id/titleTV"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_25sdp"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center_vertical"
                     android:text="@string/hello_nsign_in"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/_18ssp"
+                    android:paddingVertical="@dimen/_20sdp"
+                    android:textSize="@dimen/_22ssp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHeight_percent="0.13"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,9 +32,9 @@
                     android:background="@drawable/base_layout_bg"
                     android:orientation="vertical"
                     android:padding="@dimen/_25sdp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/titleTV"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHeight_percent="0.85"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
 
                         <TextView
