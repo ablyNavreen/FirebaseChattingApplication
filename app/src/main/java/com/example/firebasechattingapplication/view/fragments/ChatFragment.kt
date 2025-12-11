@@ -71,7 +71,6 @@ class ChatFragment : Fragment() {
         receiverName = requireArguments().getString(Constants.USER_NAME)
         receiverGender = requireArguments().getInt(Constants.USER_GENDER)
         binding.tv.text = receiverName
-        Log.d("kwejfkjwehfkjehfw", "onViewCreated: $receiverId")
         setChatsAdapter()
         getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
         getActiveUsers()
@@ -86,17 +85,13 @@ class ChatFragment : Fragment() {
                 onlineUser.addAll(messageList)
                 for (m in messageList)
                     if (m.id == receiverId)
-                        if (m.typing == true && m.typingToUserId == SpUtils.getString(
-                                requireContext(),
-                                Constants.USER_ID
-                            )
-                        )
+                        if (m.typing == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
                             binding.lastSeenTV.text = "typing..."
                         else if (m.online == true)
                             binding.lastSeenTV.text = "Online"
                         else
                             binding.lastSeenTV.text =
-                                m.lastSeen?.toTimestampMillis()?.toLastSeenTime(requireContext())
+                                m.lastSeen?.toTimestampMillis()?.toLastSeenTime()
             }
             .catch { e ->
                 showToast("Error loading messages.")
@@ -106,9 +101,9 @@ class ChatFragment : Fragment() {
     private fun getMessages(
         senderId: String?,
         receiverId: String?
-    ) { // Added receiverId for clarity
+    ) {
         if (senderId == null) {
-            //user id is null
+            //id is null
             return
         }
 
@@ -152,7 +147,6 @@ class ChatFragment : Fragment() {
                     isRead = false,
                     gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt()
                 )
-                Log.d("tyry4utyiuyui", "setUpClickListeners: $message")
                 authViewModel.sendMessageToUser(message)
                 authViewModel.authState.observe(viewLifecycleOwner) { state ->
                     when (state) {
@@ -160,11 +154,9 @@ class ChatFragment : Fragment() {
 //                            ProgressIndicator.hide()
                             showToast("Error while sending message. Please try again.")
                         }
-
                         AuthState.Loading -> {
 //                            ProgressIndicator.show(requireContext())
                         }
-
                         is AuthState.Success -> {
                             binding.messageET.text = null
                             messagesAdapter?.notifyDataSetChanged()
@@ -202,14 +194,12 @@ class ChatFragment : Fragment() {
     fun setupTypingDetector() {
         binding.messageET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (count > 0 || before > 0) {
                     onTypingStarted()
                 }
             }
-
             @RequiresApi(Build.VERSION_CODES.O)
             override fun afterTextChanged(s: Editable?) {
                 typingHandler.removeCallbacks(typingRunnable)
@@ -224,13 +214,11 @@ class ChatFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun onTypingStarted() {
-        Log.d("TypingStatus", "User STARTING to type...")
         updateTypingStatus(true, true)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun onTypingStopped() {
-        Log.d("TypingStatus", "User STOPPED typing.")
         updateTypingStatus(true, false)
 
     }
@@ -261,16 +249,7 @@ class ChatFragment : Fragment() {
         }
     }
 
-  /*  fun applySystemInsetsPadding(view: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updatePadding(bottom = systemInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-    }*/
-
     fun applySystemInsetsPadding(view: View) {
-        // 1. Set the listener on the view (e.g., your sendMsgLayout or messagesRV)
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
             val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())

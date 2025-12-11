@@ -19,6 +19,7 @@ import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.formatIsoDateTime
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.toChatDate
+import com.example.firebasechattingapplication.utils.visible
 
 class MessagesAdapter (var context: Context, private val messages: List<Message>): RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>(){
 
@@ -47,11 +48,12 @@ class MessagesAdapter (var context: Context, private val messages: List<Message>
                 else
                     dateTV.gone()
             }
-
+            if (position == 0)
+                dateTV.visible()
 
             if (messages[position].receiverId == SpUtils.getString(context, Constants.USER_ID)){
-                receivedTV.setText(messages[position].message)
-                receivedName.setText(time)
+                receivedTV.text = messages[position].message
+                receivedName.text = time
                 receivedLayout.visibility = View.VISIBLE
                 sentLayout.visibility = View.GONE
                 if (messages[position].gender == 1)
@@ -62,9 +64,8 @@ class MessagesAdapter (var context: Context, private val messages: List<Message>
             }
             else
             {
-                Log.d(TAG, "bind: // else = "+messages[position].senderName)
-                sentTV.setText(messages[position].message)
-                senderName.setText(time)
+                sentTV.text = messages[position].message
+                senderName.text = time
                 sentLayout.visibility = View.VISIBLE
                 receivedLayout.visibility = View.GONE
                 if (messages[position].gender == 1)

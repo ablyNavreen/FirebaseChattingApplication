@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +19,7 @@ import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.showYesNoDialog
+import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -39,9 +39,9 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 
         setUpClickListeners()
     }
@@ -71,22 +71,12 @@ class SettingsFragment : Fragment() {
                     when (state) {
                         is AuthState.Error -> {
                             ProgressIndicator.hide()
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Error : main   $isOnline"
-                            )
                             showToast(state.message)
                         }
-
                         AuthState.Loading -> {
                             ProgressIndicator.show(requireContext())
                         }
-
                         is AuthState.Success -> {
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Success : main   $isOnline"
-                            )
                             logoutUser()
                         }
                     }
@@ -94,7 +84,7 @@ class SettingsFragment : Fragment() {
         }
     }
     private fun logoutUser() {
-        viewModel.logoutUser()
+        viewModel.logoutUser(requireContext())
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {
@@ -106,7 +96,7 @@ class SettingsFragment : Fragment() {
                 }
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
-                    findNavController().navigate(R.id.loginFragment)
+                    (activity as MainActivity).performLogoutAndResetUI()
                 }
             }
         }

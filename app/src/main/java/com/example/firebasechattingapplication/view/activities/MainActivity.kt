@@ -5,20 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.Window
-import android.view.WindowInsets
-import android.view.WindowManager
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -53,12 +49,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        setStatusBarColor(
-            window,
-            mainContentContainer = binding.frameLayout,
-            statusBarBgView = binding.statusBarBackgroundView
-        )
+        setStatusBarColor(window, statusBarBgView = binding.statusBarBackgroundView)
         setUpNavHost()
         checkUserSession()
         onBackPressedDispatcher.addCallback(this@MainActivity) {
@@ -66,8 +57,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setStatusBarColor(window: Window, statusBarBgView: View, mainContentContainer: View) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+   private fun setStatusBarColor(window: Window, statusBarBgView: View) {
             statusBarBgView.setBackgroundResource(R.drawable.maroon_black_gradient_bg)
             ViewCompat.setOnApplyWindowInsetsListener(statusBarBgView) { view, insets ->
                 val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -78,29 +68,23 @@ class MainActivity : AppCompatActivity() {
                 insetsController.isAppearanceLightStatusBars = false
                 WindowInsetsCompat.CONSUMED
             }
-        } else {
-            binding.statusBarBackgroundView.gone()
-            window.statusBarColor = ResourcesCompat.getColor(resources, R.color.mid_color, null)
-        }
     }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPause() {
         super.onPause()
-        Log.d("ekjfwhkjwehfw", "onPause: of onPause")
+        //make user offline when app is closed or in recents
         updateOnlineStatus(false)
     }
 
     override fun onStop() {
         super.onStop()
+        //refresh the user online status when user comes from recents
         isDataLoaded = false
-        Log.d("ekjfwhkjwehfw", "onStop: of onStop")
     }
 
     private fun checkUserSession() {
-        Log.d("elwfhkwefi", "checkUserSession : ${SpUtils.getString(this@MainActivity, Constants.USER_ID)}")
-
         if (SpUtils.getString(this@MainActivity, Constants.USER_ID)!=null){
             viewModel.isUserLogged()
             viewModel.authState.observe(this) { state ->
@@ -171,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
+               R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
                     binding.bottomNav.gone()
                 }
                 else -> binding.bottomNav.visible()
@@ -215,6 +199,26 @@ class MainActivity : AppCompatActivity() {
                 }
         }
     }
+    fun performLogoutAndResetUI() {
+        // 1. Define the NavOptions to clear the entire back stack
+        val options = androidx.navigation.navOptions {
+            // Pop up to the LoginFragment, removing all authenticated screens
+            popUpTo(R.id.loginFragment) {
+                inclusive = true
+            }
+        }
 
+        // 2. CRUCIAL: Manually reset the selected item to R.id.home.
+        // This prepares the BottomNav for the next time it becomes visible (after next login).
+        // We set it to Home because that is the destination that should be highlighted later.
+        binding.bottomNav.selectedItemId = R.id.home
+
+        // 3. Navigate to the LoginFragment
+        navController.navigate(
+            R.id.loginFragment,
+            null, // No arguments
+            options
+        )
+    }
 
 }

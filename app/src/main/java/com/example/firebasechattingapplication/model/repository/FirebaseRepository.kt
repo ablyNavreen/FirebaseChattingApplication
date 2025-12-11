@@ -31,30 +31,39 @@ class FirebaseRepository @Inject constructor(
 ) {
 
 
+    //register user
     suspend fun registerUser(email: String, password: String): AuthResult? {
         return firebaseAuth.createUserWithEmailAndPassword(email, password).await()
     }
 
+    //fetch all registered users
     suspend fun getUserData(): QuerySnapshot? {
         return firebaseFirestore.collection(Constants.USERS_COLLECTION).get().await()
     }
 
+    //login user
     suspend fun loginUser(email: String, password: String): AuthResult? {
-        return firebaseAuth.signInWithEmailAndPassword(email, password)  //pass the email & password to check the user login if account exists or not
+        return firebaseAuth.signInWithEmailAndPassword(
+            email,
+            password
+        )  //pass the email & password to check the user login if account exists or not
             .await()  //pause the coroutine till we get result
 
     }
 
+    //check current user session
     fun isUserLogged(): FirebaseUser? {
         val currentUser = firebaseAuth.currentUser
         return currentUser
     }
 
+    //save user data to database
     suspend fun addUserToFirestore(user: User) {
         firebaseFirestore.collection(Constants.USERS_COLLECTION).document(user.id.toString())
             .set(user).await()
     }
 
+    //send message
     suspend fun sendMessageToUser(message: Message) {
         firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
             .document(message.senderId + message.receiverId)
@@ -63,6 +72,7 @@ class FirebaseRepository @Inject constructor(
             .await()
     }
 
+    //manage active status
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun updateOnlineStatus(
         context: Context,
@@ -72,22 +82,18 @@ class FirebaseRepository @Inject constructor(
         typingToUserId: String
     ) {
         val userId = SpUtils.getString(context, Constants.USER_ID)
-        Log.d("ekjfwhkjwehfw", "userId: $userId")
         if (userId.isNullOrEmpty()) {
-            Log.e("wekjfbjhebfw", "User ID is null or empty. Cannot update status.")
+            Log.e("Firebase", "User ID is null or empty. Cannot update status.")
             return
         }
         val documentRef = firebaseFirestore.collection(ONLINE_USERS_COLLECTION).document(userId)
         try {
             documentRef.update("online", isOnline).await()
-
             documentRef.update("lastSeen", lastSeen).await()
-                documentRef.update("typing", isTyping).await()
-                   documentRef.update("typingToUserId", typingToUserId).await()
-
+            documentRef.update("typing", isTyping).await()
+            documentRef.update("typingToUserId", typingToUserId).await()
         } catch (e: Exception) {
             if (e.message?.contains("NOT_FOUND") == true) {
-                Log.d("wekjfbjhebfw", "Document not found. Creating new presence document.")
                 val newPresenceData = OnlineUser(
                     online = isOnline,
                     id = userId,
@@ -95,18 +101,19 @@ class FirebaseRepository @Inject constructor(
                     typingToUserId = typingToUserId,
                     lastSeen = getCurrentUtcDateTimeModern(),
                     name = SpUtils.getString(context, Constants.USER_NAME),
-                    gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt()
-                )
+                    gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt())
                 documentRef.set(newPresenceData).await()
             }
         }
     }
 
+    //logout
     suspend fun logoutUser() {
         return firebaseAuth.signOut()
     }
 
 
+    //get messages btw two users
     fun getRealTimeMessages(chatId: String): Flow<List<Message>> = callbackFlow {
         val query = firebaseFirestore
             .collection(Constants.MESSAGES_COLLECTION)
@@ -115,21 +122,16 @@ class FirebaseRepository @Inject constructor(
         // add real time snapshot Listener
         val subscription = query.addSnapshotListener { snapshot, exception ->
             if (exception != null) {
-                // Log the error and close the flow with the exception
-                Log.e(
-                    "FirestoreFlow",
-                    "Listen failed for chat $chatId: ${exception.message}",
-                    exception
-                )
+                Log.e("Firestore", "Listen failed for chat ${exception.message}", exception)
                 close(exception)
                 return@addSnapshotListener
             }
             if (snapshot != null && !snapshot.isEmpty) {
-                //Map the QuerySnapshot to a List<Message>
+                //Map the QuerySnapshot to a messages list
                 val messages = snapshot.documents.mapNotNull { document ->
                     document.toObject(Message::class.java)
                 }
-                //end the new list to the Flow collector
+                //send the new list to the Flow collector
                 trySend(messages)
             } else if (snapshot != null && snapshot.isEmpty) {
                 // Emit an empty list if the collection exists but has no documents
@@ -141,6 +143,8 @@ class FirebaseRepository @Inject constructor(
             subscription.remove()
         }
     }
+
+    //get all data in base messages list
     fun getAllMessages(): Flow<List<Message>> = callbackFlow {
         val query = firebaseFirestore
             .collectionGroup(Constants.MESSAGES_SUB_COLLECTION)
@@ -174,6 +178,7 @@ class FirebaseRepository @Inject constructor(
         }
     }
 
+    //get active users list
     fun getOnlineUsers(context: Context): Flow<List<OnlineUser>> = callbackFlow {  //flow builder
         //code here runs when observer start observing when .collect() is called
 

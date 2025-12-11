@@ -59,11 +59,12 @@ class HomeFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
+        Log.d("erkkgjerkjgr", "onResume: $isDataLoaded")
         super.onResume()
         getUserData()
-        Log.d("ekjfwhkjwehfw", "onResume: $isDataLoaded")
+       //if user open app from recents
         if (!isDataLoaded)
-            updateOnlineStatus()
+            updateOnlineStatus()   //handle multiple calls & loaders
     }
 
 
@@ -88,7 +89,6 @@ class HomeFragment : Fragment() {
                         }
 
                         is AuthState.Success -> {
-                            Log.d("wekjfbjhebfw", "updateOnlineStatusFlow  Success : main   true")
                             ProgressIndicator.hide()
                             isDataLoaded = true
                         }
@@ -162,7 +162,7 @@ class HomeFragment : Fragment() {
                     })
                 }
             } else {
-//                showToast("Could not load user data.")
+                Log.e("Firebase", "getUserData: error loading data", )
             }
         }
     }

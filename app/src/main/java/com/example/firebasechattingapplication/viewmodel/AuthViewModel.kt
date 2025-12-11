@@ -13,6 +13,7 @@ import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.model.repository.FirebaseRepository
+import com.example.firebasechattingapplication.utils.SpUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,15 +33,11 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
     val authState: LiveData<AuthState> = _authState
 
 
-//    private val _state = MutableLiveData<AuthState>(AuthState.Loading)
-//    val state: LiveData<AuthState> = _state
-
     fun addUserToFirestore(user: User) {
-//        _authState.value = AuthState.Loading
+        _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
                 val result = repository.addUserToFirestore(user)
-                Log.d("wekjfbjhebfw", "addUserToFirestore: $result")
                 _authState.value = AuthState.Success(user.id.toString())
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
@@ -74,7 +71,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
                 document.toObject(User::class.java)
             }
         } catch (e: Exception) {
-            Log.e("wekjfbjhebfw", "Error fetching users: ${e.message}")
+            Log.e("Firebase", "Error fetching users: ${e.message}")
             null
         }
     }
@@ -115,7 +112,6 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         viewModelScope.launch {
             try {
                 val result = repository.sendMessageToUser(message)
-                Log.d("wekjfbjhebfw", "sendMessageToUser: $result")
                 _authState.value = AuthState.Success("")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
@@ -139,15 +135,13 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         }
     }
 
-    fun logoutUser() {
+    fun logoutUser(context: Context) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                val result = repository.logoutUser()
-                if (result != null)
-                    _authState.value = AuthState.Success("Logged out successfully")
-                else
-                    _authState.value = AuthState.Error("Logout Failed")
+                repository.logoutUser()
+                SpUtils.cleanPref(context )
+                _authState.value = AuthState.Success("Logged out successfully")
             } catch (e: java.lang.Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Logout failed")
             }

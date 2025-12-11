@@ -5,11 +5,11 @@
         <item name="colorPrimary">@color/pink_color</item>
         <item name="colorSecondary">@color/purple_color</item>
 
-        <item name="android:statusBarColor">@color/pink_color</item>
-        <item name="statusBarBackground">@color/pink_color</item>
-        <item name="android:windowLightStatusBar">true</item>
+<!--        <item name="android:statusBarColor">@color/pink_color</item>-->
+<!--        <item name="statusBarBackground">@color/pink_color</item>-->
+<!--        <item name="android:windowLightStatusBar">false</item>-->
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+<!--        <item name="android:windowDrawsSystemBarBackgrounds">true</item>-->
     </style>
 
     <style name="Theme.FirebaseChattingApplication" parent="Base.Theme.FirebaseChattingApplication" />

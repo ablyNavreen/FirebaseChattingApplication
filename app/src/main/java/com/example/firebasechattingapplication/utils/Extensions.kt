@@ -24,20 +24,13 @@ import kotlin.math.abs
 //file containing extension functions to be used in the whole application
 
 fun isValidEmail(email: String): Boolean {
-    if (!email.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-        return true
-    } else {
-        return false
-    }
+    return !email.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
-
-//showalert message to user
 fun Fragment.showToast(message : String ){
     Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
 }
 
-//showalert message to user
 fun Activity.showToast(message : String ){
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
@@ -55,7 +48,7 @@ fun View.gone(){
 fun getCurrentUtcDateTimeModern(): String {
     val nowUtc = Instant.now()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        .withZone(ZoneId.of("UTC")) // Explicitly set the time zone to UTC
+        .withZone(ZoneId.of("UTC"))
     return formatter.format(nowUtc)
 }
 
@@ -76,18 +69,13 @@ fun showYesNoDialog(context: Context, title : String, message : String, positive
 }
 
 fun String.toTimestampMillis(): Long {
-    // 1. Define the format for ISO 8601 with milliseconds and 'Z'
     val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-        // 2. CRITICAL: Set the TimeZone to UTC to correctly parse the 'Z'
         timeZone = TimeZone.getTimeZone("UTC")
     }
-
-    // Parse the string and return the milliseconds, or 0L on failure
     return dateFormat.parse(this)?.time ?: 0L
 }
 
-// Extension function to convert Milliseconds to relative, local time
-fun Long.toLastSeenTime(context: Context): String {
+fun Long.toLastSeenTime(): String {
     val receivedCalendar = Calendar.getInstance().apply { timeInMillis = this@toLastSeenTime }
     val nowCalendar = Calendar.getInstance()
     val diffDays = abs(nowCalendar.get(Calendar.DAY_OF_YEAR) - receivedCalendar.get(Calendar.DAY_OF_YEAR))

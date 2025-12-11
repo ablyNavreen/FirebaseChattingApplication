@@ -90,6 +90,7 @@
                 android:fontFamily="sans-serif-light"
                 android:layout_below="@id/sentTV"
                 android:textColor="@color/white"
+                android:layout_gravity="end"
                 android:textSize="@dimen/_8ssp"/>
         </LinearLayout>
 

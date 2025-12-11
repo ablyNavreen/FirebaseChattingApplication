@@ -67,7 +67,6 @@ class ChatsListFragment: Fragment() {
                     val sortedList = messages.sortedBy { it.time }.groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
                     messages.clear()
                     messages.addAll(sortedList)
-                    Log.d("hkjwdhqjkhwd", "fetchAllMessages: $messages")
                     if (myChats.isNotEmpty()) {
                         binding.noMessagesTV.gone()
                         chatsAdapter?.notifyDataSetChanged()

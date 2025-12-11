@@ -14,6 +14,7 @@ import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.showToast
+import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.flow
@@ -70,6 +71,7 @@ class LoginFragment : Fragment() {
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     //save user id and navigate to home
+                    MainActivity.isDataLoaded = false //
                     SpUtils.saveString(requireContext(), Constants.USER_ID, it.userId)
                     findNavController().navigate(R.id.homeFragment)
                 }

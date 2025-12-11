@@ -1,7 +1,5 @@
 package com.example.firebasechattingapplication.model.dataclasses
 
-import com.google.firebase.firestore.DocumentId
-
 data class User (
     val id : String?=null,
     val name : String?=null,

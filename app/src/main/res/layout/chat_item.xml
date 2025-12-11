@@ -23,6 +23,7 @@
         android:fontFamily="sans-serif-medium"
         android:textSize="@dimen/_13ssp"
         android:singleLine="true"
+        android:ellipsize="end"
         android:textColor="@color/white"
        />
     <TextView
@@ -33,6 +34,7 @@
         android:layout_toStartOf="@id/dateTV"
         android:layout_below="@id/usernameTV"
         android:textColor="@color/white"
+        android:ellipsize="end"
         android:singleLine="true"
         android:fontFamily="sans-serif"
         android:textSize="@dimen/_12ssp"
@@ -43,6 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:textColor="@color/white"
+        android:layout_marginStart="@dimen/_5sdp"
         android:fontFamily="sans-serif-light"
         android:textSize="@dimen/_8ssp"
        />
