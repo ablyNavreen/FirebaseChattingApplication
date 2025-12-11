@@ -62,7 +62,7 @@ class LoginFragment : Fragment() {
             when(it){
                 is AuthState.Error -> {
                     ProgressIndicator.hide()
-                    showToast(it.message)
+                    showToast("The username or password you entered is incorrect. Please try again.")
                 }
                 AuthState.Loading -> {
                     ProgressIndicator.show(requireContext())

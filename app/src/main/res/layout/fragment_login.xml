@@ -62,6 +62,7 @@
                                     android:layout_height="wrap_content"
                                     android:hint="@string/enter_email"
                                     android:background="@null"
+                                    android:maxLength="40"
                                     style="@style/styleTextInputEditText"
                                     android:fontFamily="sans-serif"
                                     android:inputType="textPersonName" />
@@ -94,6 +95,7 @@
                                     android:layout_height="wrap_content"
                                     android:hint="@string/enter_password"
                                     android:background="@null"
+                                    android:maxLength="40"
                                     style="@style/styleTextInputEditText"
                                     android:fontFamily="sans-serif"
                                     android:inputType="textPassword" />

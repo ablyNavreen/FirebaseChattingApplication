@@ -4,6 +4,8 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.Window
+import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
@@ -11,13 +13,21 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ActivityMainBinding
 import com.example.firebasechattingapplication.model.AuthState
+import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
+import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
@@ -32,7 +42,8 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: AuthViewModel by viewModels()
     private var pressedTime: Long = 0
     private lateinit var binding: ActivityMainBinding
-    companion object{
+
+    companion object {
         var isDataLoaded = false
     }
 
@@ -43,16 +54,36 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-      /*  window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )*/
+        setStatusBarColor(
+            window,
+            mainContentContainer = binding.frameLayout,
+            statusBarBgView = binding.statusBarBackgroundView
+        )
         setUpNavHost()
-       checkUserSession()
+        checkUserSession()
         onBackPressedDispatcher.addCallback(this@MainActivity) {
             setupBackNavigation()
         }
     }
+
+    fun setStatusBarColor(window: Window, statusBarBgView: View, mainContentContainer: View) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            statusBarBgView.setBackgroundResource(R.drawable.maroon_black_gradient_bg)
+            ViewCompat.setOnApplyWindowInsetsListener(statusBarBgView) { view, insets ->
+                val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.updateLayoutParams {
+                    height = systemBarsInsets.top
+                }
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.isAppearanceLightStatusBars = false
+                WindowInsetsCompat.CONSUMED
+            }
+        } else {
+            binding.statusBarBackgroundView.gone()
+            window.statusBarColor = ResourcesCompat.getColor(resources, R.color.mid_color, null)
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPause() {
@@ -68,54 +99,70 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkUserSession() {
-        viewModel.isUserLogged()
-        viewModel.authState.observe(this) { state ->
-            when (state) {
-                is AuthState.Error -> {
-                    ProgressIndicator.hide()
-                    showToast("Session expired. Please login.")
-                    navController.navigate(R.id.loginFragment)
-                }
-                AuthState.Loading -> {
-                    ProgressIndicator.show(this@MainActivity)
-                }
-                is AuthState.Success -> {
-                    ProgressIndicator.hide()
-                    Log.d("lfwejkfew", "AuthState: $state")
-                    navController.navigate(R.id.homeFragment)
+        Log.d("elwfhkwefi", "checkUserSession : ${SpUtils.getString(this@MainActivity, Constants.USER_ID)}")
+
+        if (SpUtils.getString(this@MainActivity, Constants.USER_ID)!=null){
+            viewModel.isUserLogged()
+            viewModel.authState.observe(this) { state ->
+                when (state) {
+                    is AuthState.Error -> {
+                        ProgressIndicator.hide()
+                        showToast("Session expired. Please login.")
+                        navController.navigate(R.id.loginFragment)
+                    }
+
+                    AuthState.Loading -> {
+                        ProgressIndicator.show(this@MainActivity)
+                    }
+
+                    is AuthState.Success -> {
+                        ProgressIndicator.hide()
+                        Log.d("lfwejkfew", "AuthState: $state")
+                        navController.navigate(R.id.homeFragment)
+                    }
                 }
             }
         }
+
     }
 
 
-  private  fun setupBackNavigation() {
-            val currentDestinationId = navController.currentDestination?.id
-            Log.d("wlkjkwhjekfw", "handleBackPressLogic: setupBackNavigation tiramisu")
+    private fun setupBackNavigation() {
+        val currentDestinationId = navController.currentDestination?.id
+        Log.d("wlkjkwhjekfw", "handleBackPressLogic: setupBackNavigation tiramisu")
 
-            when (currentDestinationId) {
-                R.id.homeFragment -> {
-                    if (pressedTime + 2000 > System.currentTimeMillis())  finish()
-                    else {
-                        pressedTime = System.currentTimeMillis();
-                        showToast("Press back again to exit")
-                    }
+        when (currentDestinationId) {
+            R.id.homeFragment -> {
+                if (pressedTime + 2000 > System.currentTimeMillis())
+                    finish()
+                else {
+                    pressedTime = System.currentTimeMillis();
+                    showToast("Press back again to exit")
                 }
-                R.id.loginFragment -> finish()
-                R.id.chatsListFragment , R.id.settingsFragment -> navController.navigate(R.id.homeFragment)
-                else -> navController.popBackStack()
             }
-      super.onBackPressedDispatcher.onBackPressed()
+
+            R.id.loginFragment -> finish()
+            R.id.chatsListFragment, R.id.settingsFragment -> {
+                navController.navigate(R.id.homeFragment)
+                binding.bottomNav.selectedItemId = R.id.home
+            }
+
+            else -> navController.popBackStack()
+        }
+//      super.onBackPressedDispatcher.onBackPressed()
     }
 
 
-   private fun setUpNavHost() {
-        val nestedNavHostFragment = supportFragmentManager.findFragmentById(R.id.frameLayout) as? NavHostFragment
+    private fun setUpNavHost() {
+        val nestedNavHostFragment =
+            supportFragmentManager.findFragmentById(R.id.frameLayout) as? NavHostFragment
         navController = nestedNavHostFragment?.navController!!
         binding.bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.home -> navController.navigate(R.id.homeFragment)
-                R.id.chat -> navController.navigate(R.id.chatsListFragment)
+                R.id.home -> {
+                    navController.navigate(R.id.homeFragment)
+                }
+                 R.id.chat -> navController.navigate(R.id.chatsListFragment)
                 R.id.settings -> navController.navigate(R.id.settingsFragment)
             }
             true
@@ -124,7 +171,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.loginFragment, R.id.registerFragment, R.id.chatFragment -> {
+                R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
                     binding.bottomNav.gone()
                 }
                 else -> binding.bottomNav.visible()
@@ -135,20 +182,34 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateOnlineStatus(isOnline: Boolean) {
         lifecycleScope.launch {
-            viewModel.updateOnlineStatusFlow(this@MainActivity, isOnline, false, getCurrentUtcDateTimeModern(), "")
+            viewModel.updateOnlineStatusFlow(
+                this@MainActivity,
+                isOnline,
+                false,
+                getCurrentUtcDateTimeModern(),
+                ""
+            )
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            Log.d("wekjfbjhebfw", "updateOnlineStatusFlow  Error : main   $isOnline")
+                            Log.d(
+                                "wekjfbjhebfw",
+                                "updateOnlineStatusFlow  Error : main   $isOnline"
+                            )
                             if (!isFinishing && !isDestroyed) ProgressIndicator.hide()
                             showToast(state.message)
                         }
+
                         AuthState.Loading -> {
-                            if (!isFinishing && !isDestroyed)  ProgressIndicator.show(this@MainActivity)
+                            if (!isFinishing && !isDestroyed) ProgressIndicator.show(this@MainActivity)
                         }
+
                         is AuthState.Success -> {
-                            if (!isFinishing && !isDestroyed)  ProgressIndicator.hide()
-                            Log.d("wekjfbjhebfw", "updateOnlineStatusFlow  Success : main   $isOnline")
+                            if (!isFinishing && !isDestroyed) ProgressIndicator.hide()
+                            Log.d(
+                                "wekjfbjhebfw",
+                                "updateOnlineStatusFlow  Success : main   $isOnline"
+                            )
                         }
                     }
                 }

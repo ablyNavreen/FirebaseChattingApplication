@@ -106,12 +106,13 @@ class RegisterFragment : Fragment() {
             when (state) {
                 is AuthState.Error -> {
                     ProgressIndicator.hide()
-                    showToast( state.message)
+                    showToast("Failed to register. Please try again later.")
                 }
                 AuthState.Loading -> {
                     ProgressIndicator.show(requireContext())
                 }
                 is AuthState.Success -> {
+                    ProgressIndicator.hide()
                     //save user id and move to home
                     SpUtils.saveString(requireContext(), Constants.USER_ID, state.userId)
                     findNavController().navigate(R.id.homeFragment)

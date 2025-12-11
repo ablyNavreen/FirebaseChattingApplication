@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingBottom="@dimen/_15sdp"
-    android:paddingTop="@dimen/_30sdp"
+    android:paddingTop="@dimen/_15sdp"
     android:paddingHorizontal="@dimen/_12sdp"
     android:background="@drawable/maroon_black_gradient_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto"

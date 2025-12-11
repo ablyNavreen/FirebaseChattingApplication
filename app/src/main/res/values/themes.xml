@@ -2,23 +2,28 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.FirebaseChattingApplication" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-         <item name="colorPrimary">@color/purple_color</item>
-        <item name="colorSecondary">@color/pink_color</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/pink_color</item>
+        <item name="colorSecondary">@color/purple_color</item>
+
         <item name="android:statusBarColor">@color/pink_color</item>
+        <item name="statusBarBackground">@color/pink_color</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="Theme.FirebaseChattingApplication" parent="Base.Theme.FirebaseChattingApplication" />
+
     <style name="Progress_Dialog_Horizontal" parent="android:Theme.Holo.Dialog">
         <item name="android:windowMinWidthMajor">100%</item>
         <item name="android:windowMinWidthMinor">100%</item>
     </style>
+
     <style name="styleTextInputEditText" parent="Base.Widget.MaterialComponents.TextInputEditText">
         <item name="android:paddingStart">0dp</item>
         <item name="android:paddingEnd">0dp</item>
     </style>
+
     <style name="BottomNavNoSelectionBackground" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="selectableItemBackground">@null</item>
         <item name="itemIconSize">@dimen/_22sdp</item>

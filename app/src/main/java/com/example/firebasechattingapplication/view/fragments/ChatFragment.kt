@@ -11,6 +11,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -63,6 +66,7 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        applySystemInsetsPadding(binding.main)
         receiverId = requireArguments().getString(Constants.USER_ID)
         receiverName = requireArguments().getString(Constants.USER_NAME)
         receiverGender = requireArguments().getInt(Constants.USER_GENDER)
@@ -82,7 +86,11 @@ class ChatFragment : Fragment() {
                 onlineUser.addAll(messageList)
                 for (m in messageList)
                     if (m.id == receiverId)
-                        if (m.typing == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
+                        if (m.typing == true && m.typingToUserId == SpUtils.getString(
+                                requireContext(),
+                                Constants.USER_ID
+                            )
+                        )
                             binding.lastSeenTV.text = "typing..."
                         else if (m.online == true)
                             binding.lastSeenTV.text = "Online"
@@ -142,25 +150,26 @@ class ChatFragment : Fragment() {
                     message = binding.messageET.text.toString().trim(),
                     time = getCurrentUtcDateTimeModern(),
                     isRead = false,
-                    gender =  SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt())
+                    gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt()
+                )
                 Log.d("tyry4utyiuyui", "setUpClickListeners: $message")
                 authViewModel.sendMessageToUser(message)
                 authViewModel.authState.observe(viewLifecycleOwner) { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            ProgressIndicator.hide()
-                            showToast(state.message)
+//                            ProgressIndicator.hide()
+                            showToast("Error while sending message. Please try again.")
                         }
 
                         AuthState.Loading -> {
-                            ProgressIndicator.show(requireContext())
+//                            ProgressIndicator.show(requireContext())
                         }
 
                         is AuthState.Success -> {
-                            binding.messageET.text=null
+                            binding.messageET.text = null
                             messagesAdapter?.notifyDataSetChanged()
                             binding.noMessagesTV.gone()
-                            ProgressIndicator.hide()
+//                            ProgressIndicator.hide()
                         }
                     }
                 }
@@ -171,6 +180,15 @@ class ChatFragment : Fragment() {
     private fun setChatsAdapter() {
         messagesAdapter = MessagesAdapter(requireContext(), messages = messages)
         binding.messagesRV.adapter = messagesAdapter
+        binding.messagesRV.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            // Check if the bottom boundary of the RV has changed (i.e., screen resized by keyboard)
+            if (bottom < oldBottom) {
+                // Post the scroll to ensure it runs after all measures/layouts are done
+                binding.messagesRV.post {
+                    messagesAdapter?.itemCount?.let { if (it>0)  binding.messagesRV.smoothScrollToPosition(messagesAdapter?.itemCount?.minus(1) ?: 0) }
+                }
+            }
+        }
     }
 
 
@@ -184,12 +202,14 @@ class ChatFragment : Fragment() {
     fun setupTypingDetector() {
         binding.messageET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (count > 0 || before > 0) {
                     onTypingStarted()
                 }
             }
+
             @RequiresApi(Build.VERSION_CODES.O)
             override fun afterTextChanged(s: Editable?) {
                 typingHandler.removeCallbacks(typingRunnable)
@@ -230,8 +250,10 @@ class ChatFragment : Fragment() {
                         is AuthState.Error -> {
                             showToast(state.message)
                         }
+
                         AuthState.Loading -> {
                         }
+
                         is AuthState.Success -> {
                         }
                     }
@@ -239,5 +261,29 @@ class ChatFragment : Fragment() {
         }
     }
 
+  /*  fun applySystemInsetsPadding(view: View) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = systemInsets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+    }*/
 
+    fun applySystemInsetsPadding(view: View) {
+        // 1. Set the listener on the view (e.g., your sendMsgLayout or messagesRV)
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = imeInsets.bottom + systemInsets.bottom
+            val totalBottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()
+            ).bottom
+            v.updatePadding(
+                left = v.paddingLeft,
+                top = v.paddingTop,
+                right = v.paddingRight,
+                bottom = totalBottomInset // Use the combined/total inset
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+    }
 }

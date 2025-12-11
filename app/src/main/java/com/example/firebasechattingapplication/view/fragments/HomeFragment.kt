@@ -82,6 +82,7 @@ class HomeFragment : Fragment() {
                             ProgressIndicator.hide()
                             showToast(state.message)
                         }
+
                         AuthState.Loading -> {
                             ProgressIndicator.show(requireContext())
                         }
@@ -102,12 +103,16 @@ class HomeFragment : Fragment() {
                 onlineUser.clear()
                 val activeUsers = messageList.filter { it.online == true }
                 onlineUser.addAll(activeUsers)
-                binding.activeUsersTV.text =
-                    getString(R.string.active_users) + "(" + activeUsers.size + ")"
+                if (activeUsers.size > 0)
+                    binding.activeUsersTV.text = getString(R.string.active_users) + "(" + onlineUser.size + ")"
+                else
+                    binding.activeUsersTV.text = getString(R.string.active_users)
                 if (onlineUser.isNotEmpty()) {
+                    binding.activeUsersRV.visible()
                     binding.noUsersTV.gone()
                     activeUsersAdapter?.notifyDataSetChanged()
                 } else {
+                    binding.activeUsersRV.gone()
                     binding.noUsersTV.visible()
                 }
             }
@@ -122,13 +127,39 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val userList = viewModel.getUserData()
             if (userList != null) {
-                val userData = userList.filter { it.id == SpUtils.getString(requireContext(), Constants.USER_ID) }
+                val userData = userList.filter {
+                    it.id == SpUtils.getString(
+                        requireContext(),
+                        Constants.USER_ID
+                    )
+                }
                 if (userData.isNotEmpty()) {
-                    SpUtils.saveString(requireContext(), Constants.USER_ID, userData[0].id.toString())
-                    SpUtils.saveString(requireContext(), Constants.USER_GENDER, userData[0].gender.toString())
-                    SpUtils.saveString(requireContext(), Constants.USER_NAME, userData[0].name.toString())
-                    SpUtils.saveString(requireContext(), Constants.USER_EMAIL, userData[0].email.toString())
-                    showUsersList(userList.filter { it.id != SpUtils.getString(requireContext(), Constants.USER_ID) })
+                    SpUtils.saveString(
+                        requireContext(),
+                        Constants.USER_ID,
+                        userData[0].id.toString()
+                    )
+                    SpUtils.saveString(
+                        requireContext(),
+                        Constants.USER_GENDER,
+                        userData[0].gender.toString()
+                    )
+                    SpUtils.saveString(
+                        requireContext(),
+                        Constants.USER_NAME,
+                        userData[0].name.toString()
+                    )
+                    SpUtils.saveString(
+                        requireContext(),
+                        Constants.USER_EMAIL,
+                        userData[0].email.toString()
+                    )
+                    showUsersList(userList.filter {
+                        it.id != SpUtils.getString(
+                            requireContext(),
+                            Constants.USER_ID
+                        )
+                    })
                 }
             } else {
 //                showToast("Could not load user data.")

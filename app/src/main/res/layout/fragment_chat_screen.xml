@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-    android:paddingBottom="@dimen/_15sdp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/white"
-        android:layout_height="wrap_content">
+    android:id="@+id/main">
 
     <RelativeLayout
         android:id="@+id/topBarLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/_12sdp"
+        android:layout_alignParentTop="true"
         android:background="@drawable/maroon_black_gradient_bg"
-        android:paddingTop="@dimen/_30sdp"
-        android:paddingBottom="@dimen/_8sdp"
-        android:layout_alignParentTop="true">
+        android:paddingHorizontal="@dimen/_12sdp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="@dimen/_15sdp"
+        android:paddingBottom="@dimen/_10sdp">
+
         <ImageView
             android:id="@+id/backIV"
             android:layout_width="@dimen/_25sdp"
@@ -23,81 +27,88 @@
             android:src="@drawable/baseline_arrow_back_24"
             app:tint="@color/white" />
 
+
         <TextView
             android:id="@+id/tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:textAlignment="center"
             android:fontFamily="sans-serif-black"
-            android:layout_toRightOf="@+id/backIV"
+            android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="@dimen/_14ssp"/>
+            android:textSize="@dimen/_14ssp" />
 
 
-     <TextView
+        <TextView
             android:id="@+id/lastSeenTV"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_below="@id/tv"
             android:fontFamily="sans-serif"
+            android:textAlignment="center"
             android:textColor="@color/white"
-         android:layout_below="@id/tv"
-            android:textSize="@dimen/_10ssp"/>
+            android:textSize="@dimen/_10ssp" />
     </RelativeLayout>
+
     <TextView
         android:id="@+id/noMessagesTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="No messages found!"
-        android:layout_centerInParent="true"
         android:fontFamily="sans-serif-light"
+        android:text="No messages found!"
         android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/topBarLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/sendMsgLayout"
         android:textSize="@dimen/_10ssp"
-       />
+        android:visibility="gone" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/messagesRV"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messagesRV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/chat_message_item"
+        app:layout_constraintTop_toBottomOf="@id/topBarLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/sendMsgLayout"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <RelativeLayout
+        android:id="@+id/sendMsgLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="@dimen/_15sdp"
+        android:layout_marginTop="@dimen/_10sdp">
+
+        <EditText
+            android:id="@+id/messageET"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/_12sdp"
-            android:layout_below="@id/topBarLayout"
-            tools:listitem="@layout/chat_message_item"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:layout_above="@id/sendMsgLayout">
+            android:layout_marginHorizontal="5dp"
+            android:layout_toLeftOf="@id/sendBT"
+            android:hint="Enter message"
+            android:textColor="@color/black" />
 
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <RelativeLayout
-            android:id="@+id/sendMsgLayout"
-            android:layout_width="match_parent"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/sendBT"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:layout_alignParentBottom="true">
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/white_rounded_bg"
+            android:backgroundTint="@color/black"
+            android:fontFamily="sans-serif"
+            android:text="send"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
-            <EditText
-                android:id="@+id/messageET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter message"
-                android:layout_marginHorizontal="5dp"
-                android:layout_toLeftOf="@id/sendBT"
-                android:textColor="@color/black"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/sendBT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="send"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
-                android:background="@drawable/white_rounded_bg"
-                android:backgroundTint="@color/black"
-                android:layout_alignParentEnd="true"/>
-
-
-        </RelativeLayout>
 
     </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

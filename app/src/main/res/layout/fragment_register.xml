@@ -28,12 +28,13 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:background="@drawable/base_layout_bg"
             android:orientation="vertical"
             android:padding="@dimen/_25sdp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/titleTV"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -62,6 +63,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:fontFamily="sans-serif"
+                    android:maxLength="40"
                     android:hint="@string/enter_name"
                     android:inputType="textPersonName" />
 
@@ -76,21 +78,29 @@
                 android:textColor="@color/pink_color"
                 android:textSize="@dimen/_14ssp" />
 
-            <CheckBox
-                android:id="@+id/maleCB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/pink_color"
-                android:text="Male"
-                android:textColor="@color/black"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <CheckBox
+                    android:id="@+id/maleCB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/pink_color"
+                    android:text="Male"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"/>
 
-            <CheckBox
-                android:id="@+id/femaleCB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:backgroundTint="@color/pink_color"
-                android:text="Female" />
+                <CheckBox
+                    android:id="@+id/femaleCB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/pink_color"
+                    android:text="Female" />
+
+            </LinearLayout>
+
 
             <TextView
                 android:layout_width="wrap_content"
@@ -117,6 +127,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
+                    android:maxLength="40"
                     android:fontFamily="sans-serif"
                     android:hint="@string/enter_email"
                     android:inputType="textEmailAddress" />
@@ -150,6 +161,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:fontFamily="sans-serif"
+                    android:maxLength="40"
                     android:hint="@string/enter_password"
                     android:inputType="textPassword" />
 
@@ -181,6 +193,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
+                    android:maxLength="40"
                     android:fontFamily="sans-serif"
                     android:hint="@string/enter_confirm_password"
                     android:inputType="textPassword" />

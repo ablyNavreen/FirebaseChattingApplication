@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/maroon_black_gradient_bg"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:fillViewport="true">
 
     <LinearLayout
@@ -23,7 +22,7 @@
         android:text="@string/active_users"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-black"
-        android:layout_marginVertical="@dimen/_30sdp"
+        android:layout_marginVertical="@dimen/_15sdp"
         android:textSize="@dimen/_15ssp"
         />
 
