@@ -13,4 +13,6 @@ object Constants {
     const val USER_NAME = "user_name"
     const val USER_EMAIL = "user_email"
     const val USER_GENDER = "user_gender"
+    const val USER_TOKEN = "user_token"
+    const val FIREBASE_SERVER_KEY = "BMiRQWCNKMMiT4GLuoKiHig81J-9U3FmTNLYxzoc5Zf-H6TUNUBvbeb_oD6M9SRl-lJiIb9ENB2iRfqVhgd58G0"
 }

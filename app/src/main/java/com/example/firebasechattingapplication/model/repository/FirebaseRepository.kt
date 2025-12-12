@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.WriteBatch
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -109,11 +110,40 @@ class FirebaseRepository @Inject constructor(
         }
     }
 
+
+
     //logout
     fun logoutUser() {
         return firebaseAuth.signOut()
     }
 
+    //update message status as read
+    suspend fun updateMessageStatus(chatId: String){
+        val documentRef = firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
+            .document(chatId)
+            .collection(Constants.MESSAGES_SUB_COLLECTION)
+        documentRef
+            .whereEqualTo("read", false)  //remove unnecessary rewrites
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    println("No messages found to update.")
+                    return@addOnSuccessListener
+                }
+                val batch: WriteBatch = firebaseFirestore.batch()
+                for (document in querySnapshot.documents) {
+                    val docRef = document.reference
+                    batch.update(docRef, "read", true)
+                }
+                batch.commit()
+                    .addOnSuccessListener {
+                        println("Successfully updated all ${querySnapshot.size()} messages to 'true'") }
+                    .addOnFailureListener { e -> println("Error committing batch update: $e") }
+            }
+            .addOnFailureListener { e -> println("Error fetching messages for update: $e") }
+
+
+    }
 
     //get messages btw two users
     fun getRealTimeMessages(chatId: String): Flow<List<Message>> = callbackFlow {

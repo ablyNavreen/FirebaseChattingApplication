@@ -40,13 +40,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 
-const val TYPING_TIMEOUT_MS = 1500L // 1.5 seconds
+const val TYPING_TIMEOUT_MS = 1500L
 
 @AndroidEntryPoint
 class ChatFragment : Fragment() {
     private lateinit var binding: FragmentChatScreenBinding
     private val authViewModel: AuthViewModel by viewModels()
     var receiverId: String? = ""
+    var receiverToken: String? = ""
     var receiverName: String? = ""
     var receiverGender: Int? = null
     private val messages = ArrayList<Message>()
@@ -70,12 +71,14 @@ class ChatFragment : Fragment() {
         receiverId = requireArguments().getString(Constants.USER_ID)
         receiverName = requireArguments().getString(Constants.USER_NAME)
         receiverGender = requireArguments().getInt(Constants.USER_GENDER)
+        receiverToken = requireArguments().getString(Constants.USER_TOKEN)
         binding.tv.text = receiverName
         setChatsAdapter()
         getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
         getActiveUsers()
         setUpClickListeners()
         setupTypingDetector()
+//        updateMessageStatus(receiverId+SpUtils.getString(requireContext(), Constants.USER_ID))
     }
 
     private fun getActiveUsers() {
@@ -98,6 +101,7 @@ class ChatFragment : Fragment() {
             }.launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun getMessages(
         senderId: String?,
         receiverId: String?
@@ -114,6 +118,7 @@ class ChatFragment : Fragment() {
             .onEach { messageList ->
                 messages.clear()
                 messages.addAll(messageList)
+                updateMessageStatus(receiverId+SpUtils.getString(requireContext(), Constants.USER_ID))
                 messagesAdapter?.notifyDataSetChanged()
                 if (messageList.isNotEmpty()) {
                     binding.noMessagesTV.gone()
@@ -144,7 +149,7 @@ class ChatFragment : Fragment() {
                     receiverName = receiverName,
                     message = binding.messageET.text.toString().trim(),
                     time = getCurrentUtcDateTimeModern(),
-                    isRead = false,
+                    read = false,
                     gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
                     senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
                     receiverGender = receiverGender
@@ -153,17 +158,15 @@ class ChatFragment : Fragment() {
                 authViewModel.authState.observe(viewLifecycleOwner) { state ->
                     when (state) {
                         is AuthState.Error -> {
-//                            ProgressIndicator.hide()
                             showToast("Error while sending message. Please try again.")
                         }
                         AuthState.Loading -> {
-//                            ProgressIndicator.show(requireContext())
                         }
                         is AuthState.Success -> {
                             binding.messageET.text = null
                             messagesAdapter?.notifyDataSetChanged()
+                            authViewModel.sendNotificationToUser("h there", receiverToken ?:"", requireContext())
                             binding.noMessagesTV.gone()
-//                            ProgressIndicator.hide()
                         }
                     }
                 }
@@ -175,9 +178,7 @@ class ChatFragment : Fragment() {
         messagesAdapter = MessagesAdapter(requireContext(), messages = messages)
         binding.messagesRV.adapter = messagesAdapter
         binding.messagesRV.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
-            // Check if the bottom boundary of the RV has changed (i.e., screen resized by keyboard)
             if (bottom < oldBottom) {
-                // Post the scroll to ensure it runs after all measures/layouts are done
                 binding.messagesRV.post {
                     messagesAdapter?.itemCount?.let { if (it>0)  binding.messagesRV.smoothScrollToPosition(messagesAdapter?.itemCount?.minus(1) ?: 0) }
                 }
@@ -250,6 +251,24 @@ class ChatFragment : Fragment() {
                 }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateMessageStatus(chatId: String) {
+        //only one id is required -> update the received messages only
+        lifecycleScope.launch {
+            authViewModel.updateMessageStatus(
+                requireContext(),
+                chatId).collect { state ->
+                    when (state) {
+                        is AuthState.Error -> {
+                            showToast(state.message)
+                        }
+                        AuthState.Loading -> {}
+                        is AuthState.Success -> {}
+                    }
+                }
+        }
+    }
+
 
     fun applySystemInsetsPadding(view: View) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->

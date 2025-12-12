@@ -58,16 +58,17 @@ class ChatsListFragment: Fragment() {
                             senderId = if(!sentByMe) m.senderId else m.receiverId,
                             senderName =if(!sentByMe) m.senderName else m.receiverName,
                             time = m.time,
-                            isRead = m.isRead,
+                            read = m.read,
                             message = m.message,
                             gender = if (!sentByMe) m.senderGender else m.receiverGender,
                             senderGender = if (!sentByMe) m.senderGender else m.receiverGender,
+                            sentByMe = sentByMe
                         ))
 
                     }
                     val sortedList = messages.sortedBy { it.time }.groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
                     messages.clear()
-                    messages.addAll(sortedList)
+                    messages.addAll(sortedList.sortedByDescending { it.time })
                     if (myChats.isNotEmpty()) {
                         binding.noMessagesTV.gone()
                         chatsAdapter?.notifyDataSetChanged()
@@ -84,11 +85,12 @@ class ChatsListFragment: Fragment() {
     private fun setChatsAdapter() {
         chatsAdapter = ChatsAdapter(requireContext(), messages = messages)
         binding.chatsRV.adapter = chatsAdapter
-        chatsAdapter?.messageUser = { userId, userName, userGender ->
+        chatsAdapter?.messageUser = { userId, userName, userGender, userToken ->
             findNavController().navigate(R.id.chatFragment, Bundle().apply {
                 putString(Constants.USER_ID, userId)
                 putString(Constants.USER_NAME, userName)
                 putInt(Constants.USER_GENDER, userGender)
+                putString(Constants.USER_TOKEN, userToken)
             })
     }}
 

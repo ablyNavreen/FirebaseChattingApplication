@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         super.onStop()
-        //make user offline when app is closed or in recents
+        //offline when app is closed or in recents
         updateOnlineStatus(false)
     }
 
@@ -170,23 +170,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun performLogoutAndResetUI() {
-        // 1. Define the NavOptions to clear the entire back stack
         val options = androidx.navigation.navOptions {
-            // Pop up to the LoginFragment, removing all authenticated screens
             popUpTo(R.id.loginFragment) {
                 inclusive = true
             }
         }
 
-        // 2. CRUCIAL: Manually reset the selected item to R.id.home.
-        // This prepares the BottomNav for the next time it becomes visible (after next login).
-        // We set it to Home because that is the destination that should be highlighted later.
         binding.bottomNav.selectedItemId = R.id.home
 
-        // 3. Navigate to the LoginFragment
         navController.navigate(
             R.id.loginFragment,
-            null, // No arguments
+            null,
             options
         )
     }

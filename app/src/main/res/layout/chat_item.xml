@@ -7,6 +7,7 @@
     android:id="@+id/baseLayout"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
     <ImageView
         android:id="@+id/profilePicIV"
         android:layout_width="@dimen/_50sdp"
@@ -19,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/profilePicIV"
-        android:layout_toStartOf="@id/dateTV"
+        android:layout_toStartOf="@id/countTV"
         android:fontFamily="sans-serif-medium"
         android:textSize="@dimen/_13ssp"
         android:singleLine="true"
@@ -31,14 +32,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/profilePicIV"
-        android:layout_toStartOf="@id/dateTV"
+        android:layout_toStartOf="@id/countTV"
         android:layout_below="@id/usernameTV"
         android:textColor="@color/white"
         android:ellipsize="end"
         android:singleLine="true"
         android:fontFamily="sans-serif"
-        android:textSize="@dimen/_12ssp"
-      />
+        android:textSize="@dimen/_12ssp"/>
+
+        <View
+            android:id="@+id/countTV"
+            android:layout_height="@dimen/_8sdp"
+            android:layout_width="@dimen/_8sdp"
+            android:layout_toStartOf="@id/dateTV"
+            android:visibility="gone"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_centerVertical="true"
+            android:background="@drawable/white_circle_sctroke"
+            android:backgroundTint="@color/green"
+           />
     <TextView
         android:id="@+id/dateTV"
         android:layout_width="wrap_content"

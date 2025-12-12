@@ -13,10 +13,12 @@ import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.formatIsoDateTime
+import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.toChatDate
+import com.example.firebasechattingapplication.utils.visible
 
 class ChatsAdapter(var context: Context, private val messages: List<Message>) : RecyclerView.Adapter<ChatsAdapter.HomeViewHolder>() {
-    var messageUser : ((userId : String,userName : String, userGender : Int)->Unit)?=null
+    var messageUser : ((userId : String,userName : String, userGender : Int, userToken: String)->Unit)?=null
 
     inner class HomeViewHolder(val binding: ChatItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -38,11 +40,26 @@ class ChatsAdapter(var context: Context, private val messages: List<Message>) : 
             else
                 profilePicIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
 
+
+            messages[position].sentByMe?.let {
+                if (!it)
+                    if (messages[position].read == false){
+                        baseLayout.alpha = 0.7f
+                        countTV.visible()
+                    }
+                else{
+                        countTV.gone()
+                        baseLayout.alpha = 1f
+                    }
+
+            }
+
+
             usernameTV.text = messages[position].senderName
             messageTV.text = messages[position].message
             baseLayout.setOnClickListener {
                 messageUser?.invoke(messages[position].senderId.toString(),messages[position].senderName.toString(),
-                    messages[position].senderGender?:0)
+                    messages[position].senderGender?:0, messages[position].userToken?:"")
             }
         }
     }

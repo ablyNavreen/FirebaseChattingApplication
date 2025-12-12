@@ -23,7 +23,6 @@ class UsersAdapter (var context: Context, private val users: List<OnlineUser>) :
         with(holder.binding) {
            idTV.text = users[position].id
            nameTV.text = users[position].name
-//           emailTV.text = users[position].email
             if (users[position].gender == 1)
                 userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
             else

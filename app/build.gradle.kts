@@ -76,8 +76,13 @@ dependencies {
     // ssp
     implementation("com.intuit.ssp:ssp-android:1.1.1")
 
-    //image loading
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    // Core Firebase SDK (Recommended)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
 
 }

@@ -8,11 +8,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.firebasechattingapplication.firebase.FcmSender
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.model.repository.FirebaseRepository
+import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: FirebaseRepository) :
+class AuthViewModel @Inject constructor(private val repository: FirebaseRepository, private val fcmSender: FcmSender) :
     ViewModel() {
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Loading)
@@ -51,11 +53,14 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         viewModelScope.launch {
             try {
                 //pass email & password to repo method for registeration
-                val result = repository.registerUser(userData.email.toString(), userData.password.toString())
-                val user =User( name = userData.name.toString(),
+                val result =
+                    repository.registerUser(userData.email.toString(), userData.password.toString())
+                val user = User(
+                    name = userData.name.toString(),
                     email = userData.email, gender = userData.gender,
                     password = userData.password,
-                    id = result?.user?.uid?:"")
+                    id = result?.user?.uid ?: ""
+                )
                 //after sucessfull registeration save user info to firestore
                 addUserToFirestore(user)
             } catch (e: Exception) {
@@ -97,7 +102,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
             try {
                 val result = repository.isUserLogged()
                 if (result != null)
-                    _authState.value = AuthState.Success(result.uid?: "")
+                    _authState.value = AuthState.Success(result.uid ?: "")
                 else
                     _authState.value = AuthState.Error("Login Failed")
             } catch (e: java.lang.Exception) {
@@ -111,7 +116,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         viewModelScope.launch {
             try {
                 repository.logoutUser()
-                SpUtils.cleanPref(context )
+                SpUtils.cleanPref(context)
                 _authState.value = AuthState.Success("Logged out successfully")
             } catch (e: java.lang.Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Logout failed")
@@ -141,7 +146,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         val combinedFlow = combine(flow1, flow2) { messages1, messages2 ->
             //whenerver there is change in list by flow1 or flow2 -> we get new list
             val combined = messages1 + messages2
-           //combined list is sorted and returned
+            //combined list is sorted and returned
             combined.sortedBy { it.time }
         }
         // convert the resulting Flow into a StateFlow
@@ -155,6 +160,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
                 initialValue = emptyList() //initially list is empty
             )
     }
+
     fun getAllMessages(): StateFlow<List<Message>> {
         // fetch the lists based on both chat ids
         val flow = repository.getAllMessages()
@@ -169,7 +175,8 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
                 initialValue = emptyList() //initially list is empty
             )
     }
- fun getOnlineUsers(context: Context): StateFlow<List<OnlineUser>> {
+
+    fun getOnlineUsers(context: Context): StateFlow<List<OnlineUser>> {
 
         val flow = repository.getOnlineUsers(context)
         return flow
@@ -193,11 +200,41 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
     ): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            repository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
+            repository.updateOnlineStatus(context, isOnline, isTyping, lastSeen, typingToUserId)
             emit(AuthState.Success("Status updated."))
         } catch (e: Exception) {
             emit(AuthState.Error(e.message ?: "Failed to update status."))
         }
     }
 
+    fun updateMessageStatus(
+        context: Context,
+        chatId: String
+    ): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            repository.updateMessageStatus(chatId)
+            emit(AuthState.Success("Status updated."))
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.message ?: "Failed to update status."))
+        }
+    }
+
+    fun sendNotificationToUser(message: String, recipientFCMToken: String, context: Context) {
+        viewModelScope.launch {
+            fcmSender.sendPushNotification(
+                recipientToken = recipientFCMToken,
+                senderName = SpUtils.getString(context, Constants.USER_NAME) ?: "",
+                messageContent = message ?: "...",
+                customChatData = mapOf(
+                    "messageData" to "Navreen"
+                ),
+                /*customChatData = mapOf(
+                    "chatId" to message.receiverId!! + message.senderId!!,
+                    "senderId" to message.senderId!!
+                )*/
+            )
+        }
+
+    }
 }

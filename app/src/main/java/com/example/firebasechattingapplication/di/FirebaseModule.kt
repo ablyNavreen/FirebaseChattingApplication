@@ -1,5 +1,7 @@
 package com.example.firebasechattingapplication.di
 
+import com.example.firebasechattingapplication.firebase.FcmSender
+import com.example.firebasechattingapplication.utils.Constants.FIREBASE_SERVER_KEY
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,5 +27,10 @@ object FirebaseModule {
     @Singleton
     fun getFirestore(): FirebaseFirestore {
         return Firebase.firestore
+    }
+    @Provides
+    @Singleton
+    fun getFCMSender(): FcmSender {
+        return FcmSender(FIREBASE_SERVER_KEY)
     }
 }

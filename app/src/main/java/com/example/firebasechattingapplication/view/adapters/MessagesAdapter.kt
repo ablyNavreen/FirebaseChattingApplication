@@ -51,6 +51,13 @@ class MessagesAdapter (var context: Context, private val messages: List<Message>
             if (position == 0)
                 dateTV.visible()
 
+            if (messages[position].read == true)
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
+            else
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.delivered, null))
+            /*else{
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
+            }*/
             if (messages[position].receiverId == SpUtils.getString(context, Constants.USER_ID)){
                 receivedTV.text = messages[position].message
                 receivedName.text = time
