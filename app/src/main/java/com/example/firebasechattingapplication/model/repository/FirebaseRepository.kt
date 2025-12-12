@@ -100,7 +100,9 @@ class FirebaseRepository @Inject constructor(
                     typing = isTyping,
                     typingToUserId = typingToUserId,
                     lastSeen = getCurrentUtcDateTimeModern(),
+                    currentTime = getCurrentUtcDateTimeModern(),
                     name = SpUtils.getString(context, Constants.USER_NAME),
+                    email = SpUtils.getString(context, Constants.USER_EMAIL),
                     gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt())
                 documentRef.set(newPresenceData).await()
             }
@@ -108,7 +110,7 @@ class FirebaseRepository @Inject constructor(
     }
 
     //logout
-    suspend fun logoutUser() {
+    fun logoutUser() {
         return firebaseAuth.signOut()
     }
 

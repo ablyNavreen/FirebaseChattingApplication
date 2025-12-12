@@ -15,15 +15,12 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentHomeBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
-import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
-import com.example.firebasechattingapplication.view.activities.MainActivity.Companion.isDataLoaded
 import com.example.firebasechattingapplication.view.adapters.ActiveUsersAdapter
 import com.example.firebasechattingapplication.view.adapters.UsersAdapter
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
@@ -53,18 +50,15 @@ class HomeFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        getUserData()
         showActiveUsersList()  //setup adapter
         getActiveUsers()       //fetch active users lit
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
-        Log.d("erkkgjerkjgr", "onResume: $isDataLoaded")
         super.onResume()
-        getUserData()
-       //if user open app from recents
-        if (!isDataLoaded)
-            updateOnlineStatus()   //handle multiple calls & loaders
+        updateOnlineStatus()
     }
 
 
@@ -80,18 +74,9 @@ class HomeFragment : Fragment() {
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            ProgressIndicator.hide()
                             showToast(state.message)
                         }
-
-                        AuthState.Loading -> {
-                            ProgressIndicator.show(requireContext())
-                        }
-
-                        is AuthState.Success -> {
-                            ProgressIndicator.hide()
-                            isDataLoaded = true
-                        }
+                        else -> {}
                     }
                 }
         }
@@ -101,10 +86,25 @@ class HomeFragment : Fragment() {
         viewModel.getOnlineUsers(requireContext())
             .onEach { messageList ->
                 onlineUser.clear()
-                val activeUsers = messageList.filter { it.online == true }
+                val allUsers = messageList.filter {
+                    it.id != SpUtils.getString(
+                        requireContext(),
+                        Constants.USER_ID
+                    ) && it.name!=null
+                }.sortedByDescending { it.currentTime}
+                if (allUsers.isEmpty()) {
+                    binding.noUsersTV2.visible()
+                    binding.usersRV.gone()
+                } else {
+                    binding.noUsersTV2.gone()
+                    binding.usersRV.visible()
+                }
+                showUsersList(allUsers)
+                val activeUsers = messageList.filter { it.online == true && it.name!=null }
                 onlineUser.addAll(activeUsers)
                 if (activeUsers.size > 0)
-                    binding.activeUsersTV.text = getString(R.string.active_users) + "(" + onlineUser.size + ")"
+                    binding.activeUsersTV.text =
+                        getString(R.string.active_users) + "(" + onlineUser.size + ")"
                 else
                     binding.activeUsersTV.text = getString(R.string.active_users)
                 if (onlineUser.isNotEmpty()) {
@@ -154,22 +154,15 @@ class HomeFragment : Fragment() {
                         Constants.USER_EMAIL,
                         userData[0].email.toString()
                     )
-                    showUsersList(userList.filter {
-                        it.id != SpUtils.getString(
-                            requireContext(),
-                            Constants.USER_ID
-                        )
-                    })
                 }
             } else {
-                Log.e("Firebase", "getUserData: error loading data", )
+                Log.e("Firebase", "getUserData: error loading data")
             }
         }
     }
 
-    private fun showUsersList(userList: List<User>) {
-        if (userList.isEmpty())
-            binding.noUsersTV2.visible()
+    private fun showUsersList(userList: List<OnlineUser>) {
+
         val adapter = UsersAdapter(requireContext(), userList)
         binding.usersRV.adapter = adapter
         adapter.messageUser = { userId, userName, userGender ->

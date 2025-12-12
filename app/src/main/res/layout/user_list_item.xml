@@ -38,6 +38,7 @@
             android:layout_below="@id/idTV"
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif-medium"
+            android:layout_centerVertical="true"
             android:text="User Name"
             android:textColor="@color/black"
             android:textSize="@dimen/_13ssp" />
@@ -50,6 +51,7 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif"
+            android:visibility="gone"
             android:textColor="@color/black"
             android:text="User@gmail.com"
             android:textSize="@dimen/_12ssp" />

@@ -64,18 +64,6 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         }
     }
 
-    suspend fun getUserData(): List<User>? {
-        return try {
-            val snapshot = repository.getUserData()
-            snapshot?.documents?.mapNotNull { document ->
-                document.toObject(User::class.java)
-            }
-        } catch (e: Exception) {
-            Log.e("Firebase", "Error fetching users: ${e.message}")
-            null
-        }
-    }
-
     fun loginUser(email: String, password: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
@@ -89,23 +77,6 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun updateOnlineStatusFlow(
-        context: Context,
-        isOnline: Boolean,
-        isTyping: Boolean,
-        lastSeen: String,
-        typingToUserId: String
-    ): Flow<AuthState> = flow {
-        emit(AuthState.Loading)
-        try {
-            repository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
-            emit(AuthState.Success("Status updated."))
-        } catch (e: Exception) {
-            emit(AuthState.Error(e.message ?: "Failed to update status."))
-        }
-    }
 
     fun sendMessageToUser(message: Message) {
         _authState.value = AuthState.Loading
@@ -148,6 +119,18 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
         }
     }
 
+
+    suspend fun getUserData(): List<User>? {
+        return try {
+            val snapshot = repository.getUserData()
+            snapshot?.documents?.mapNotNull { document ->
+                document.toObject(User::class.java)
+            }
+        } catch (e: Exception) {
+            Log.e("Firebase", "Error fetching users: ${e.message}")
+            null
+        }
+    }
 
     // Expose the messages as a StateFlow for the UI
     fun getMessages(chatId: String, chatId2: String): StateFlow<List<Message>> {
@@ -198,6 +181,23 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseReposito
                 started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec othweise shut down
                 initialValue = emptyList() //initially list is empty to eliminate null
             )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateOnlineStatusFlow(
+        context: Context,
+        isOnline: Boolean,
+        isTyping: Boolean,
+        lastSeen: String,
+        typingToUserId: String
+    ): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            repository.updateOnlineStatus(context, isOnline, isTyping, lastSeen,typingToUserId)
+            emit(AuthState.Success("Status updated."))
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.message ?: "Failed to update status."))
+        }
     }
 
 }

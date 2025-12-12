@@ -97,7 +97,7 @@ class RegisterFragment : Fragment() {
     private fun hitRegisterUser() {
         val  gender = if (binding.maleCB.isChecked) 0 else 1  //0-male, 1-female
         val user =User( name = binding.nameET.text.toString(),
-            email = binding.emailET.text.toString(),
+            email = binding.emailET.text.toString().trim(),
             gender = gender,
             password = binding.passwordET.text.toString().trim())
         //hit register using firebase
@@ -115,6 +115,9 @@ class RegisterFragment : Fragment() {
                     ProgressIndicator.hide()
                     //save user id and move to home
                     SpUtils.saveString(requireContext(), Constants.USER_ID, state.userId)
+                    SpUtils.saveString(requireContext(), Constants.USER_GENDER, gender.toString())
+                    SpUtils.saveString(requireContext(), Constants.USER_NAME, binding.nameET.text.toString().trim())
+                    SpUtils.saveString(requireContext(), Constants.USER_EMAIL, binding.emailET.text.toString().trim())
                     findNavController().navigate(R.id.homeFragment)
                 }
             }

@@ -39,9 +39,6 @@ class MainActivity : AppCompatActivity() {
     private var pressedTime: Long = 0
     private lateinit var binding: ActivityMainBinding
 
-    companion object {
-        var isDataLoaded = false
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -78,11 +75,6 @@ class MainActivity : AppCompatActivity() {
         updateOnlineStatus(false)
     }
 
-    override fun onStop() {
-        super.onStop()
-        //refresh the user online status when user comes from recents
-        isDataLoaded = false
-    }
 
     private fun checkUserSession() {
         if (SpUtils.getString(this@MainActivity, Constants.USER_ID)!=null){
@@ -113,8 +105,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBackNavigation() {
         val currentDestinationId = navController.currentDestination?.id
-        Log.d("wlkjkwhjekfw", "handleBackPressLogic: setupBackNavigation tiramisu")
-
         when (currentDestinationId) {
             R.id.homeFragment -> {
                 if (pressedTime + 2000 > System.currentTimeMillis())

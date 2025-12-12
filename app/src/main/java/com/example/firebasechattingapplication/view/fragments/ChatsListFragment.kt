@@ -61,6 +61,7 @@ class ChatsListFragment: Fragment() {
                             isRead = m.isRead,
                             message = m.message,
                             gender = if (!sentByMe) m.senderGender else m.receiverGender,
+                            senderGender = if (!sentByMe) m.senderGender else m.receiverGender,
                         ))
 
                     }

@@ -145,7 +145,9 @@ class ChatFragment : Fragment() {
                     message = binding.messageET.text.toString().trim(),
                     time = getCurrentUtcDateTimeModern(),
                     isRead = false,
-                    gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt()
+                    gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
+                    senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
+                    receiverGender = receiverGender
                 )
                 authViewModel.sendMessageToUser(message)
                 authViewModel.authState.observe(viewLifecycleOwner) { state ->

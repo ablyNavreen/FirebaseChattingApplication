@@ -13,6 +13,7 @@ import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.isValidEmail
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
@@ -71,7 +72,6 @@ class LoginFragment : Fragment() {
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     //save user id and navigate to home
-                    MainActivity.isDataLoaded = false //
                     SpUtils.saveString(requireContext(), Constants.USER_ID, it.userId)
                     findNavController().navigate(R.id.homeFragment)
                 }
@@ -82,10 +82,13 @@ class LoginFragment : Fragment() {
     fun validateData() : Boolean {  //checks for login validations
         binding.apply {
             if (emailET.text.toString().trim().isEmpty()) {
-                showToast("Email can't be empty")
+                showToast("Please enter email address")
                 return false
-            } else if (passwordET.text.toString().trim().isEmpty()) {
-                showToast("Password can't be empty")
+            }  else if (! isValidEmail(emailET.text.toString())) {
+                showToast("Please enter valid email address")
+                return false
+            }else if (passwordET.text.toString().trim().isEmpty()) {
+                showToast("Please enter password")
                 return false
             } else {
               return true
