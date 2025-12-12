@@ -69,8 +69,8 @@ class MainActivity : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         //make user offline when app is closed or in recents
         updateOnlineStatus(false)
     }
@@ -86,14 +86,11 @@ class MainActivity : AppCompatActivity() {
                         showToast("Session expired. Please login.")
                         navController.navigate(R.id.loginFragment)
                     }
-
                     AuthState.Loading -> {
                         ProgressIndicator.show(this@MainActivity)
                     }
-
                     is AuthState.Success -> {
                         ProgressIndicator.hide()
-                        Log.d("lfwejkfew", "AuthState: $state")
                         navController.navigate(R.id.homeFragment)
                     }
                 }
@@ -123,7 +120,6 @@ class MainActivity : AppCompatActivity() {
 
             else -> navController.popBackStack()
         }
-//      super.onBackPressedDispatcher.onBackPressed()
     }
 
 
@@ -166,25 +162,9 @@ class MainActivity : AppCompatActivity() {
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Error : main   $isOnline"
-                            )
-                            if (!isFinishing && !isDestroyed) ProgressIndicator.hide()
                             showToast(state.message)
                         }
-
-                        AuthState.Loading -> {
-                            if (!isFinishing && !isDestroyed) ProgressIndicator.show(this@MainActivity)
-                        }
-
-                        is AuthState.Success -> {
-                            if (!isFinishing && !isDestroyed) ProgressIndicator.hide()
-                            Log.d(
-                                "wekjfbjhebfw",
-                                "updateOnlineStatusFlow  Success : main   $isOnline"
-                            )
-                        }
+                       else  -> {}
                     }
                 }
         }
