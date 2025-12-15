@@ -24,7 +24,7 @@ import kotlin.math.abs
 //file containing extension functions to be used in the whole application
 
 fun isValidEmail(email: String): Boolean {
-    return !email.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 fun Fragment.showToast(message : String ){

@@ -59,7 +59,7 @@ class ChatsAdapter(var context: Context, private val messages: List<Message>) : 
             messageTV.text = messages[position].message
             baseLayout.setOnClickListener {
                 messageUser?.invoke(messages[position].senderId.toString(),messages[position].senderName.toString(),
-                    messages[position].senderGender?:0, messages[position].userToken?:"")
+                    messages[position].senderGender?:0, messages[position].senderToken?:"")
             }
         }
     }

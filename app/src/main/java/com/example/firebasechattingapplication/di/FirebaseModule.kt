@@ -6,6 +6,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,5 +34,11 @@ object FirebaseModule {
     @Singleton
     fun getFCMSender(): FcmSender {
         return FcmSender(FIREBASE_SERVER_KEY)
+    }
+
+    @Provides
+    @Singleton
+    fun getFirebaseStorage(): FirebaseStorage {
+        return Firebase.storage
     }
 }

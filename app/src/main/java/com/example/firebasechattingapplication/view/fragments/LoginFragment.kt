@@ -71,8 +71,6 @@ class LoginFragment : Fragment() {
                 }
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
-                    //save user id and navigate to home
-                    SpUtils.saveString(requireContext(), Constants.USER_ID, it.userId)
                     findNavController().navigate(R.id.homeFragment)
                 }
             }
@@ -84,7 +82,7 @@ class LoginFragment : Fragment() {
             if (emailET.text.toString().trim().isEmpty()) {
                 showToast("Please enter email address")
                 return false
-            }  else if (! isValidEmail(emailET.text.toString())) {
+            }  else if (! isValidEmail(emailET.text.toString().trim())) {
                 showToast("Please enter valid email address")
                 return false
             }else if (passwordET.text.toString().trim().isEmpty()) {

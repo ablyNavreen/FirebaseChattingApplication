@@ -7,11 +7,11 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.UserListItemBinding
-import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
+import com.example.firebasechattingapplication.model.dataclasses.User
 
-class UsersAdapter (var context: Context, private val users: List<OnlineUser>) : RecyclerView.Adapter<UsersAdapter.HomeViewHolder>() {
+class UsersAdapter (var context: Context, private val users: List<User>) : RecyclerView.Adapter<UsersAdapter.HomeViewHolder>() {
 
-    var messageUser : ((userId : String,userName : String, userGender : Int)->Unit)?=null
+    var messageUser : ((userId : String,userName : String, userGender : Int, token : String)->Unit)?=null
     inner class HomeViewHolder(val binding: UserListItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
@@ -28,7 +28,8 @@ class UsersAdapter (var context: Context, private val users: List<OnlineUser>) :
             else
                 userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
             baseLayout.setOnClickListener {
-                messageUser?.invoke(users[position].id.toString(),users[position].name.toString(), users[position].gender ?:0)
+                messageUser?.invoke(users[position].id.toString(),users[position].name.toString()
+                    , users[position].gender ?:0, users[position].token?:"")
             }
         }
     }

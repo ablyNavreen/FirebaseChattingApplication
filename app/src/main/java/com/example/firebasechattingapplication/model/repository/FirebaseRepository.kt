@@ -1,22 +1,27 @@
 package com.example.firebasechattingapplication.model.repository
 
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.Constants.ONLINE_USERS_COLLECTION
+import com.example.firebasechattingapplication.utils.Constants.USERS_COLLECTION
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.WriteBatch
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -28,7 +33,8 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val firebaseFirestore: FirebaseFirestore
+    private val firebaseFirestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) {
 
 
@@ -38,9 +44,7 @@ class FirebaseRepository @Inject constructor(
     }
 
     //fetch all registered users
-    suspend fun getUserData(): QuerySnapshot? {
-        return firebaseFirestore.collection(Constants.USERS_COLLECTION).get().await()
-    }
+
 
     //login user
     suspend fun loginUser(email: String, password: String): AuthResult? {
@@ -60,7 +64,8 @@ class FirebaseRepository @Inject constructor(
 
     //save user data to database
     suspend fun addUserToFirestore(user: User) {
-        firebaseFirestore.collection(Constants.USERS_COLLECTION).document(user.id.toString())
+        firebaseFirestore.collection(Constants.USERS_COLLECTION)
+            .document(user.id.toString())
             .set(user).await()
     }
 
@@ -71,6 +76,19 @@ class FirebaseRepository @Inject constructor(
             .collection(Constants.MESSAGES_SUB_COLLECTION)
             .add(message)
             .await()
+    }
+
+
+    suspend fun uploadImage(imageUri: Uri, senderId: String?): String {
+        val storageRef: StorageReference = storage.reference
+            .child("messsage_image")
+            .child("${senderId}.jpg")
+        val uploadTask = storageRef.putFile(imageUri).await()
+        if (!uploadTask.task.isSuccessful) {
+            throw Exception("Failed to upload image to Firebase Storage.")
+        }
+        val downloadUrl = storageRef.downloadUrl.await().toString()
+        return downloadUrl
     }
 
     //manage active status
@@ -104,12 +122,12 @@ class FirebaseRepository @Inject constructor(
                     currentTime = getCurrentUtcDateTimeModern(),
                     name = SpUtils.getString(context, Constants.USER_NAME),
                     email = SpUtils.getString(context, Constants.USER_EMAIL),
-                    gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt())
+                    gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt()
+                )
                 documentRef.set(newPresenceData).await()
             }
         }
     }
-
 
 
     //logout
@@ -118,7 +136,7 @@ class FirebaseRepository @Inject constructor(
     }
 
     //update message status as read
-    suspend fun updateMessageStatus(chatId: String){
+    fun updateMessageStatus(chatId: String) {
         val documentRef = firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
             .document(chatId)
             .collection(Constants.MESSAGES_SUB_COLLECTION)
@@ -137,7 +155,8 @@ class FirebaseRepository @Inject constructor(
                 }
                 batch.commit()
                     .addOnSuccessListener {
-                        println("Successfully updated all ${querySnapshot.size()} messages to 'true'") }
+                        println("Successfully updated all ${querySnapshot.size()} messages to 'true'")
+                    }
                     .addOnFailureListener { e -> println("Error committing batch update: $e") }
             }
             .addOnFailureListener { e -> println("Error fetching messages for update: $e") }
@@ -210,6 +229,10 @@ class FirebaseRepository @Inject constructor(
         }
     }
 
+  /*  fun getUserData(): QuerySnapshot? {
+        return firebaseFirestore.collection(Constants.USERS_COLLECTION).get().await()
+    }*/
+
     //get active users list
     fun getOnlineUsers(context: Context): Flow<List<OnlineUser>> = callbackFlow {  //flow builder
         //code here runs when observer start observing when .collect() is called
@@ -244,5 +267,60 @@ class FirebaseRepository @Inject constructor(
             subscription.remove()
         }
     }
+    fun getUserData(): Flow<List<User>> = callbackFlow {  //flow builder
+        val query = firebaseFirestore
+            .collection(USERS_COLLECTION)  //fetch data from collection
+        val subscription = query.addSnapshotListener { snapshot, exception ->
+            if (exception != null) {
+                close(exception)  //terminates flow in case of exception
+                return@addSnapshotListener
+            }
+            if (snapshot != null && !snapshot.isEmpty) {
+                val messages = snapshot.documents.mapNotNull { document ->
+                    document.toObject(User::class.java)
+                }
+                trySend(messages)
+            } else if (snapshot != null && snapshot.isEmpty) {
+                trySend(emptyList())
+            }
+        }
+        awaitClose {  //called when collector stops
+            subscription.remove()
+        }
+    }
 
+
+    fun getAndSaveFCMToken(onTokenReady: (String) -> Unit) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(
+                    "kjgehgkhjegrkjhrgk",
+                    "Fetching FCM registration token failed",
+                    task.exception
+                )
+                return@addOnCompleteListener
+            }
+            // Get new FCM registration token
+            val token = task.result
+            onTokenReady(token)
+        }
+    }
+
+
+    //save user fcm token to firestore
+    suspend fun updateFCMToken(userId: String, token: String): AuthState {
+        if (userId.isEmpty()) {
+            Log.e("Firebase", "User ID is null or empty. Cannot update status.")
+            return AuthState.Error("User ID is null")
+        }
+        val documentRef = firebaseFirestore.collection(USERS_COLLECTION)
+            .document(userId)
+        return try {
+            documentRef.update("token", token).await() // .await()
+            AuthState.Success("Update successful.")
+        } catch (e: Exception) {
+            AuthState.Error(e.message ?: "Update failed.")
+        }
+
+    }
 }

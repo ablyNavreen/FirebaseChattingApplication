@@ -57,6 +57,7 @@ class ChatsListFragment: Fragment() {
                         messages.add(Message(
                             senderId = if(!sentByMe) m.senderId else m.receiverId,
                             senderName =if(!sentByMe) m.senderName else m.receiverName,
+                            senderToken =if(!sentByMe) m.senderToken else m.receiverToken,
                             time = m.time,
                             read = m.read,
                             message = m.message,

@@ -1,5 +1,6 @@
 package com.example.firebasechattingapplication.view.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,6 +39,7 @@ class RegisterFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -44,6 +47,7 @@ class RegisterFragment : Fragment() {
         setUpClickListeners()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setUpClickListeners() {
         binding.apply {
             loginTV.setOnClickListener {
@@ -71,7 +75,7 @@ class RegisterFragment : Fragment() {
             else if (emailET.text.toString().trim().isEmpty()) {
                 showToast("Please enter email address")
                 return false
-            } else if (! isValidEmail(emailET.text.toString())) {
+            } else if (! isValidEmail(emailET.text.toString().trim())) {
                 showToast("Please enter valid email address")
                 return false
             }
@@ -94,6 +98,7 @@ class RegisterFragment : Fragment() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun hitRegisterUser() {
         val  gender = if (binding.maleCB.isChecked) 0 else 1  //0-male, 1-female
         val user =User( name = binding.nameET.text.toString(),

@@ -13,5 +13,7 @@ data class Message(
     val gender: Int?=null,
     val unreadMessages: Int?=null,
     val sentByMe: Boolean?=null,
-    val userToken: String?=null
+    val senderToken: String?=null,
+    val receiverToken: String?=null,
+    val image: String?=null
 )

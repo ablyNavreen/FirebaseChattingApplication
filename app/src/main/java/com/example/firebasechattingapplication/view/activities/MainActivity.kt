@@ -2,7 +2,6 @@ package com.example.firebasechattingapplication.view.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.Window
 import androidx.activity.addCallback
@@ -48,23 +47,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setStatusBarColor(window, statusBarBgView = binding.statusBarBackgroundView)
         setUpNavHost()
+
+        binding.root.post { handleNotification() }
         checkUserSession()
         onBackPressedDispatcher.addCallback(this@MainActivity) {
             setupBackNavigation()
         }
     }
 
-   private fun setStatusBarColor(window: Window, statusBarBgView: View) {
-            statusBarBgView.setBackgroundResource(R.drawable.maroon_black_gradient_bg)
-            ViewCompat.setOnApplyWindowInsetsListener(statusBarBgView) { view, insets ->
-                val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                view.updateLayoutParams {
-                    height = systemBarsInsets.top
-                }
-                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                insetsController.isAppearanceLightStatusBars = false
-                WindowInsetsCompat.CONSUMED
+    private fun handleNotification() {
+        val senderId = intent.getStringExtra("sender_id")
+        if (senderId != null) {
+              navController.navigate(R.id.chatFragment, Bundle().apply {
+                    putString(Constants.USER_ID, senderId)
+                    putString(Constants.USER_NAME, intent.getStringExtra("sender_name"))
+                    putString(Constants.USER_GENDER, intent.getStringExtra("sender_gender"))
+                    putString(Constants.USER_TOKEN, intent.getStringExtra("sender_token"))
+                })
+        } else {
+            //failure or null case - normal execution through splash
+
+        }
+    }
+
+    private fun setStatusBarColor(window: Window, statusBarBgView: View) {
+        statusBarBgView.setBackgroundResource(R.drawable.maroon_black_gradient_bg)
+        ViewCompat.setOnApplyWindowInsetsListener(statusBarBgView) { view, insets ->
+            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams {
+                height = systemBarsInsets.top
             }
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            insetsController.isAppearanceLightStatusBars = false
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
 
@@ -77,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun checkUserSession() {
-        if (SpUtils.getString(this@MainActivity, Constants.USER_ID)!=null){
+        if (SpUtils.getString(this@MainActivity, Constants.USER_ID) != null) {
             viewModel.isUserLogged()
             viewModel.authState.observe(this) { state ->
                 when (state) {
@@ -86,9 +102,11 @@ class MainActivity : AppCompatActivity() {
                         showToast("Session expired. Please login.")
                         navController.navigate(R.id.loginFragment)
                     }
+
                     AuthState.Loading -> {
                         ProgressIndicator.show(this@MainActivity)
                     }
+
                     is AuthState.Success -> {
                         ProgressIndicator.hide()
                         navController.navigate(R.id.homeFragment)
@@ -132,7 +150,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.home -> {
                     navController.navigate(R.id.homeFragment)
                 }
-                 R.id.chat -> navController.navigate(R.id.chatsListFragment)
+
+                R.id.chat -> navController.navigate(R.id.chatsListFragment)
                 R.id.settings -> navController.navigate(R.id.settingsFragment)
             }
             true
@@ -141,9 +160,10 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-               R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
+                R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
                     binding.bottomNav.gone()
                 }
+
                 else -> binding.bottomNav.visible()
             }
         }
@@ -164,11 +184,13 @@ class MainActivity : AppCompatActivity() {
                         is AuthState.Error -> {
                             showToast(state.message)
                         }
-                       else  -> {}
+
+                        else -> {}
                     }
                 }
         }
     }
+
     fun performLogoutAndResetUI() {
         val options = androidx.navigation.navOptions {
             popUpTo(R.id.loginFragment) {

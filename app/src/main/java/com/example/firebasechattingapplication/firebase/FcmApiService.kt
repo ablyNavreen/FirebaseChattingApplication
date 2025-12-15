@@ -8,7 +8,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface FcmApiService {
-    @POST("fcm/send")
+    @POST("/messages:send")
     suspend fun sendNotification(
         @Header("Authorization") serverKey: String,
         @Header("Content-Type") contentType: String = "application/json",

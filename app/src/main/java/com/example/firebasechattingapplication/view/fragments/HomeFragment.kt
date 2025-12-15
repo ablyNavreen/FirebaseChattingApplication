@@ -15,7 +15,9 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentHomeBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
+import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.Constants
+import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
@@ -35,7 +37,9 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: AuthViewModel by viewModels()  //get viewmodel instance
     private var activeUsersAdapter: ActiveUsersAdapter? = null  //top active users adapter
+    private var usersAdapter: UsersAdapter? = null  //all users adapter
     private val onlineUser = ArrayList<OnlineUser>()  //list observed by active users adapter
+    private val allUsers = ArrayList<User>()  //list observed by all users adapter
 
 
     override fun onCreateView(
@@ -50,9 +54,33 @@ class HomeFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("tokennnnnn", "onViewCreated home: ${SpUtils.getString(requireContext(), Constants.USER_TOKEN)}")
+
+        showUsersList()
         getUserData()
         showActiveUsersList()  //setup adapter
         getActiveUsers()       //fetch active users lit
+//        getFcmToken()
+    }
+
+    private fun getFcmToken() {
+        viewModel.updateFCMToken()
+        viewModel.authState.observe(viewLifecycleOwner) { status ->
+            when(status){
+                is AuthState.Success -> {
+                    Log.d("kjgehgkhjegrkjhrgk", "getFcmToken: success" )
+                    ProgressIndicator.hide()
+                }
+                is AuthState.Error -> {
+                    Log.d("kjgehgkhjegrkjhrgk", "getFcmToken: Error" )
+                    ProgressIndicator.hide()
+                    showToast("Fetching token failed.")
+                }
+                AuthState.Loading ->{
+                    ProgressIndicator.show(requireContext())
+                }
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -83,23 +111,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun getActiveUsers() {
-        viewModel.getOnlineUsers(requireContext())
+        viewModel.getOnlineUsers()
             .onEach { messageList ->
                 onlineUser.clear()
-                val allUsers = messageList.filter {
-                    it.id != SpUtils.getString(
-                        requireContext(),
-                        Constants.USER_ID
-                    ) && it.name!=null
-                }.sortedByDescending { it.currentTime}
-                if (allUsers.isEmpty()) {
-                    binding.noUsersTV2.visible()
-                    binding.usersRV.gone()
-                } else {
-                    binding.noUsersTV2.gone()
-                    binding.usersRV.visible()
-                }
-                showUsersList(allUsers)
+
                 val activeUsers = messageList.filter { it.online == true && it.name!=null }
                 onlineUser.addAll(activeUsers)
                 if (activeUsers.size > 0)
@@ -124,52 +139,57 @@ class HomeFragment : Fragment() {
     }
 
     private fun getUserData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val userList = viewModel.getUserData()
-            if (userList != null) {
-                val userData = userList.filter {
-                    it.id == SpUtils.getString(
-                        requireContext(),
-                        Constants.USER_ID
-                    )
-                }
+      viewModel.getUserData()
+            .onEach { userList ->
+                Log.d("wkqjwqhw", "getUserData: ${userList.size}")
+                allUsers.clear()
+                val userData = userList.filter { it.id == SpUtils.getString(requireContext(), Constants.USER_ID) }
                 if (userData.isNotEmpty()) {
-                    SpUtils.saveString(
-                        requireContext(),
-                        Constants.USER_ID,
-                        userData[0].id.toString()
-                    )
-                    SpUtils.saveString(
-                        requireContext(),
-                        Constants.USER_GENDER,
-                        userData[0].gender.toString()
-                    )
-                    SpUtils.saveString(
-                        requireContext(),
-                        Constants.USER_NAME,
-                        userData[0].name.toString()
-                    )
-                    SpUtils.saveString(
-                        requireContext(),
-                        Constants.USER_EMAIL,
-                        userData[0].email.toString()
-                    )
-                }
-            } else {
-                Log.e("Firebase", "getUserData: error loading data")
+                SpUtils.saveString(
+                    requireContext(),
+                    Constants.USER_ID,
+                    userData[0].id.toString()
+                )
+                SpUtils.saveString(
+                    requireContext(),
+                    Constants.USER_GENDER,
+                    userData[0].gender.toString()
+                )
+                SpUtils.saveString(
+                    requireContext(),
+                    Constants.USER_NAME,
+                    userData[0].name.toString()
+                )
+                SpUtils.saveString(
+                    requireContext(),
+                    Constants.USER_EMAIL,
+                    userData[0].email.toString())
             }
-        }
+                allUsers.addAll(userList.filter {
+                    it.id != SpUtils.getString(requireContext(), Constants.USER_ID) && it.name!=null
+                }.sortedByDescending { it.currentTime})
+
+                if (allUsers.isEmpty()) {
+                    binding.noUsersTV2.visible()
+                    binding.usersRV.gone()
+                } else {
+                    binding.noUsersTV2.gone()
+                    binding.usersRV.visible()
+                    usersAdapter?.notifyDataSetChanged()
+                }
+            }
+          .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    private fun showUsersList(userList: List<OnlineUser>) {
-
-        val adapter = UsersAdapter(requireContext(), userList)
-        binding.usersRV.adapter = adapter
-        adapter.messageUser = { userId, userName, userGender ->
+    private fun showUsersList() {
+        usersAdapter = UsersAdapter(requireContext(), allUsers)
+        binding.usersRV.adapter = usersAdapter
+        usersAdapter?.messageUser = { userId, userName, userGender , userToken->
             findNavController().navigate(R.id.chatFragment, Bundle().apply {
                 putString(Constants.USER_ID, userId)
                 putString(Constants.USER_NAME, userName)
                 putInt(Constants.USER_GENDER, userGender)
+                putString(Constants.USER_TOKEN, userToken)
             })
         }
     }

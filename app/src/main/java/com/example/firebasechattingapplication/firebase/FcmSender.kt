@@ -1,16 +1,16 @@
 package com.example.firebasechattingapplication.firebase
 
 
+import FcmData
 import FcmNotification
 import FcmRequest
+import com.example.firebasechattingapplication.utils.Constants.FCM_BASE_URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class FcmSender(private val serverKey: String) {
-
-    private val FCM_BASE_URL = "https://fcm.googleapis.com/"
 
     private val api: FcmApiService by lazy {
         Retrofit.Builder()
@@ -25,7 +25,7 @@ class FcmSender(private val serverKey: String) {
         recipientToken: String,
         senderName: String,
         messageContent: String,
-        customChatData: Map<String, String>
+        customChatData: FcmData
     ) = withContext(Dispatchers.IO) {
 
         val requestBody = FcmRequest(

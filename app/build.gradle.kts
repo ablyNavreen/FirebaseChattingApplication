@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+//    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,5 +85,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
     // Core Firebase SDK (Recommended)
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+
+    implementation("com.google.firebase:firebase-storage")
 
 }
