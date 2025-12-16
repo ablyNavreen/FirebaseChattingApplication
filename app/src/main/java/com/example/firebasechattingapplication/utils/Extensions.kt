@@ -4,12 +4,17 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Base64
 import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -142,6 +147,16 @@ fun String.extractFirstName(): String? {
     return if (words.isNotEmpty()) {
         words[0]
     } else {
+        null
+    }
+}
+
+suspend fun String.base64ToBitmap(): Bitmap? = withContext(Dispatchers.IO) {
+    return@withContext try {
+        val imageBytes = Base64.decode(this@base64ToBitmap, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 }

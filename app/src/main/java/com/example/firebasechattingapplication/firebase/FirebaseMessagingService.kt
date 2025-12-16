@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.view.activities.MainActivity
+import com.example.firebasechattingapplication.view.fragments.ChatFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -45,9 +46,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        Log.d("pushshhhs", "onMessageReceived: $message")
         if (message.data.isNotEmpty()) {
-            Log.d("pushshhhs", "message.data: ${message.data}")
             try {
                 if (message.data["sender_id"]?.isNotEmpty() == true) {
                     val senderId = message.data["sender_id"]
@@ -59,49 +58,34 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                     intent.putExtra("sender_name", senderName)
                     intent.putExtra("sender_gender", senderGender)
                     intent.putExtra("sender_token", senderToken)
-                    makePush(intent, senderName)
+                    if (!ChatFragment.isChatOpen)
+                        makePush(intent, senderName)
                 }
             } catch (e: Exception) {
             }
-
         }
-       /* else if (message.notification != null) {
-            Log.d("pushshhhs", "message.notification: ${message.notification}")
-
-            val title = message.notification!!.title ?: "New Notification"
-            val body = message.notification!!.body ?: "You have a new update."
-            makePush(intent)
-        }*/
     }
 
     private fun makePush(intent: Intent?, senderName: String?) {
-        //foreground handling
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0,
-            intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
-        intent?.flags =
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        val pendingIntent = PendingIntent.getActivity(this, 0,
+            intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+        intent?.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         val channelId = CHANNEL_ID
         soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
-            .setContentTitle(senderName+" sent a message")
+            .setContentTitle(senderName + " sent a message")
             .setContentText("You have a new message.")
             .setStyle(NotificationCompat.BigTextStyle().bigText("You have a new message."))
             .setAutoCancel(true)
             .setSound(soundUri)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
-//            .setDefaults(Notification.DEFAULT_ALL)
 
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, getString(R.string.app_name),
-                NotificationManager.IMPORTANCE_HIGH)
+            val channel = NotificationChannel(channelId, getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH)
             channel.enableLights(true)
             channel.lightColor = Color.MAGENTA
             channel.setShowBadge(true)
@@ -113,9 +97,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
     private fun sendRegistrationToServer(token: String) {
         val userId = firebaseAuth.currentUser?.uid
-
         if (userId == null) {
-            // User is not logged in or session is null. Token will be saved upon login.
             Log.w(TAG, "User not logged in. Token not saved yet.")
             return
         }

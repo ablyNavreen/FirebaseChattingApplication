@@ -88,4 +88,5 @@ dependencies {
 
     implementation("com.google.firebase:firebase-storage")
 
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }

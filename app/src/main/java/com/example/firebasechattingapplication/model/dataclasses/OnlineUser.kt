@@ -10,5 +10,6 @@ data class OnlineUser (
     val id : String?=null,
     val gender : Int?=null,
     val currentTime : String?=null,
+    val token : String?=null,
 
 )

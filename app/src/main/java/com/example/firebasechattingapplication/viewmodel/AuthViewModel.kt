@@ -1,6 +1,5 @@
 package com.example.firebasechattingapplication.viewmodel
 
-import FcmData
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
@@ -108,7 +107,9 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.sendMessageToUser(message)
-                sendNotificationToUser(message, message.receiverToken?:"")
+                sendNotificationToUser(message,
+                    "ya29.a0Aa7pCA-pFUks3tsJH21ptn6-f6XStYbenVpYodk0y2-9H8EKmT4ecVoWcsUjM3TeYPKpN0f-ZX28jP4jrXjRMQr1ssqOSBMxf1TvYIg9ve5t4YJtDPahEd7itQojzU6Al5qB6VOW8B88WD13dnIN6QinMlB0UHgkz7_aSttL3RdwuAY96VUHRXfdJ_h37y8K6yr670oaCgYKAcwSARMSFQHGX2MiuKfvDexTcwKvVZMQthQofg0206"
+                ,message.receiverToken?:"")
                 _authState.value = AuthState.Success("")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
@@ -132,7 +133,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun logoutUser(context: Context) {
+    fun logoutUser() {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
@@ -241,23 +242,16 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun sendNotificationToUser(message: Message, recipientFCMToken: String) {
-        viewModelScope.launch {
-            fcmSender.sendPushNotification(
-                recipientToken = recipientFCMToken,
-                senderName = SpUtils.getString(application, Constants.USER_NAME) ?: "",
-                messageContent = message.message ?: "...",
-                customChatData = FcmData( senderId = message.senderId?:"",
-                    senderToken = message.senderToken?:"",
-                    senderGender = message.senderGender.toString(),
-                    senderName = message.senderName?:""),
-                /*customChatData = mapOf(
-                    "chatId" to message.receiverId!! + message.senderId!!,
-                    "senderId" to message.senderId!!
-                )*/
-            )
+    fun sendNotificationToUser(message: Message, accessToken: String, receiverFcmToken : String) {
+        if (!receiverFcmToken.isNullOrEmpty()) {
+            viewModelScope.launch {
+                fcmSender.sendPushNotification(
+                    accessToken = accessToken,
+                    receiverToken = receiverFcmToken,
+                    messageContent = message
+                )
+            }
         }
-
     }
 
     fun updateFCMToken() {

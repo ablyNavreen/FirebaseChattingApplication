@@ -2,7 +2,6 @@ package com.example.firebasechattingapplication.view.fragments
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,7 +83,7 @@ class SettingsFragment : Fragment() {
         }
     }
     private fun logoutUser() {
-        viewModel.logoutUser(requireContext())
+        viewModel.logoutUser()
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {

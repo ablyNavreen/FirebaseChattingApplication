@@ -54,6 +54,20 @@ class ChatFragment : ImagePickerUtility() {
     private var messagesAdapter: MessagesAdapter? = null
     private val onlineUser = ArrayList<OnlineUser>()
 
+    companion object{
+        var isChatOpen  = false
+    }
+
+    override fun onStart() {
+        super.onStart()
+        isChatOpen = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        isChatOpen = false
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

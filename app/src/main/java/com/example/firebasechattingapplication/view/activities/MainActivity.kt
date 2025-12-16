@@ -1,15 +1,21 @@
 package com.example.firebasechattingapplication.view.activities
 
+import android.Manifest
+import android.app.AlertDialog
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.Window
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,8 +34,13 @@ import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -38,6 +49,14 @@ class MainActivity : AppCompatActivity() {
     private var pressedTime: Long = 0
     private lateinit var binding: ActivityMainBinding
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+//                showToast("Notification Permission Granted!")
+            } else {
+                showToast("Notification Permission Denied. Notifications will not be shown.")
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -45,15 +64,21 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val t = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()
+            Log.d("lgjjgreegri", "onCreate: ${t?.token}")
+        }
+
         setStatusBarColor(window, statusBarBgView = binding.statusBarBackgroundView)
         setUpNavHost()
-
         binding.root.post { handleNotification() }
         checkUserSession()
         onBackPressedDispatcher.addCallback(this@MainActivity) {
             setupBackNavigation()
         }
     }
+
 
     private fun handleNotification() {
         val senderId = intent.getStringExtra("sender_id")
@@ -66,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 })
         } else {
             //failure or null case - normal execution through splash
-
+            requestNotificationPermission()
         }
     }
 
@@ -205,6 +230,40 @@ class MainActivity : AppCompatActivity() {
             null,
             options
         )
+    }
+
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+ (API 33+)
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    Log.d("Perm", "POST_NOTIFICATIONS already granted.")
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    showPermissionRationaleDialog()
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            Log.d("Perm", "POST_NOTIFICATIONS automatically granted below Android 13.")
+        }
+    }
+
+    private fun showPermissionRationaleDialog() {
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("Notification Permission Required")
+            .setMessage("We need access to send you important updates. Please grant the notification permission.")
+            .setPositiveButton("OK") { dialog, which ->
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            .setNegativeButton("Cancel") { dialog, which ->
+            }
+            .show()
     }
 
 }
