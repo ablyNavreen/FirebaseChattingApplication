@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Base64
+import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.Toast
@@ -15,6 +16,8 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -38,6 +41,10 @@ fun Fragment.showToast(message : String ){
 
 fun Activity.showToast(message : String ){
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
+}
+fun showToast(context: Context, message : String ){
+    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 
 }
 
@@ -159,4 +166,37 @@ suspend fun String.base64ToBitmap(): Bitmap? = withContext(Dispatchers.IO) {
         e.printStackTrace()
         null
     }
+}
+
+fun encodeAudioToBase64(filePath: String): String? {
+    val audioFile = File(filePath)
+    if (!audioFile.exists())
+        return null
+    val fileSizeInKB = audioFile.length() / 1024
+    if (fileSizeInKB > 700) {
+        Log.e("Base64", "File too large for Firestore!")
+        return null
+    }
+    return try {
+            val bytes = audioFile.readBytes()
+            Base64.encodeToString(bytes, Base64.NO_WRAP)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+fun decodeBase64Audio(context: Context, base64Audio: String): File? {
+    var tempFile : File?=null
+    try {
+        if (base64Audio.isNotEmpty()){
+            val audioBytes = Base64.decode(base64Audio, Base64.NO_WRAP)
+             tempFile = File.createTempFile("temp_audio", ".m4a", context.cacheDir)
+            val fos = FileOutputStream(tempFile)
+            fos.write(audioBytes)
+            fos.close()
+        }
+    } catch (e: Exception) {
+        Log.e("AudioPlayer", "Error playing audio: ${e.message}")
+    }
+    return tempFile
 }

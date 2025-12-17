@@ -4,7 +4,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -38,9 +37,6 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("tokennnnnn", "onNewToken: $token")
-
-        //save the new token to Firestore.
         sendRegistrationToServer(token)
     }
 
@@ -61,7 +57,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                     if (!ChatFragment.isChatOpen)
                         makePush(intent, senderName)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
     }
@@ -75,7 +71,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
-            .setContentTitle(senderName + " sent a message")
+            .setContentTitle("$senderName sent a message")
             .setContentText("You have a new message.")
             .setStyle(NotificationCompat.BigTextStyle().bigText("You have a new message."))
             .setAutoCancel(true)
@@ -83,7 +79,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH)
             channel.enableLights(true)

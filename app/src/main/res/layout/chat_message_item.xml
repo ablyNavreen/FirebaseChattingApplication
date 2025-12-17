@@ -30,12 +30,43 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:layout_marginEnd="8dp"
-           />
+            android:contentDescription="@string/sender" />
+
+        <RelativeLayout
+            android:id="@+id/msgLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/senderDP"
+            android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/receivedAudioMsgRL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:padding="@dimen/_5sdp">
+            <ImageView
+                android:id="@+id/playIV"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:contentDescription="@string/play"
+                android:src="@drawable/play"
+                app:tint="@color/white" />
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/receiverSB"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/playIV"
+                android:max="100"
+                android:progressBackgroundTint="@color/white"
+                android:progressTint="@color/white"
+                android:thumbTint="@color/white"/>
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/receivedMsgRl"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/senderDP"
             android:layout_height="wrap_content">
             <TextView
                 android:id="@+id/receivedTV"
@@ -43,14 +74,16 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:layout_marginTop="3dp"
+                android:text="lwkfhjkehwew"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_12ssp"/>
 
             <ImageView
                 android:id="@+id/receivedIV"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_50sdp"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_100sdp"
                 android:layout_marginTop="3dp"
+                android:contentDescription="@string/image"
                 android:src="@color/white"
                 android:scaleType="fitXY"
                 android:visibility="gone"
@@ -59,14 +92,15 @@
         </RelativeLayout>
 
 
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/receivedName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
-            android:layout_below="@id/receivedMsgRl"
-            android:layout_toRightOf="@id/senderDP"
+            android:layout_below="@id/msgLayout"
+            android:layout_toEndOf="@id/senderDP"
             android:textColor="@color/white"
             android:textSize="@dimen/_8ssp"/>
     </RelativeLayout>
@@ -83,7 +117,8 @@
             android:id="@+id/myDP"
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
-            android:layout_toEndOf="@id/msgs" />
+            android:layout_toEndOf="@id/msgs"
+            android:contentDescription="@string/image" />
 
         <LinearLayout
             android:id="@+id/msgs"
@@ -91,6 +126,31 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/sentAudioMsgRL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/_5sdp"
+                android:visibility="gone">
+                <ImageView
+                    android:id="@+id/sendPlayIV"
+                    android:layout_width="@dimen/_20sdp"
+                    android:layout_height="@dimen/_20sdp"
+                    android:contentDescription="@string/play"
+                    android:src="@drawable/play"
+                    app:tint="@color/white" />
+
+                <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/senderSB"
+                    android:layout_width="@dimen/_80sdp"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/sendPlayIV"
+                    android:max="100"
+                    android:progressBackgroundTint="@color/white"
+                    android:progressTint="@color/white"
+                    android:thumbTint="@color/white"/>
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/msgRL"
@@ -108,9 +168,10 @@
 
             <ImageView
                 android:id="@+id/sendIV"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_50sdp"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_100sdp"
                 android:layout_marginTop="3dp"
+                android:contentDescription="@string/send"
                 android:src="@color/white"
                 android:visibility="gone"
                 android:scaleType="fitXY"
@@ -123,7 +184,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
-                android:layout_below="@id/msgRL"
                 android:textColor="@color/white"
                 android:layout_gravity="end"
                 android:textSize="@dimen/_8ssp"/>
@@ -133,6 +193,7 @@
                 android:layout_width="@dimen/_15sdp"
                 android:layout_height="@dimen/_15sdp"
                 android:layout_gravity="end"
+                android:contentDescription="@string/status"
                 android:src="@drawable/delivered"/>
         </LinearLayout>
 

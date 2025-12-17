@@ -18,6 +18,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.example.firebasechattingapplication"
     }
 
     buildTypes {
@@ -89,4 +90,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // AppAuth Library for secure OAuth flow
+    implementation("net.openid:appauth:0.11.1")
+
 }

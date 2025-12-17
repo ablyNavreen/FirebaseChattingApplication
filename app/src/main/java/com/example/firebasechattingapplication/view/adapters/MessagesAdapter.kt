@@ -1,16 +1,14 @@
 package com.example.firebasechattingapplication.view.adapters
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-
 import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.firebasechattingapplication.R
@@ -29,107 +27,213 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MessagesAdapter (var context: Context, private val messages: List<Message>): RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>(){
+class MessagesAdapter(var context: Context, private val messages: List<Message>) :
+    RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>() {
 
-    var lastDate =""
+    var lastDate = ""
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private var imageLoadingJob: Job? = null
-    inner class HomeViewHolder(val binding: ChatMessageItemBinding) : RecyclerView.ViewHolder(binding.root)
 
+    inner class HomeViewHolder(val binding: ChatMessageItemBinding) : RecyclerView.ViewHolder(binding.root){
+        val receiverSB: AppCompatSeekBar = itemView.findViewById(R.id.receiverSB)
+        val senderSB: AppCompatSeekBar = itemView.findViewById(R.id.senderSB)
+    }
+
+    var playPauseAudio: ((pos: Int) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
-        return HomeViewHolder(ChatMessageItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return HomeViewHolder(
+            ChatMessageItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
-
         with(holder.binding) {
 
+//            Log.d("lerkglkejrg", "onBindViewHolder: pos $position ->  ${messages[position]}")
             val (date, time) = formatIsoDateTime(messages[position].time)
-            if (lastDate == ""){
+            if (lastDate == "") {
                 lastDate = date
                 dateTV.text = date.toChatDate()
-            }
-            else{
-                if (lastDate != date){
+            } else {
+                if (lastDate != date) {
                     //show date
                     lastDate = date
                     dateTV.text = date.toChatDate()
-                }
-                else
+                } else
                     dateTV.gone()
             }
             if (position == 0)
                 dateTV.visible()
 
             if (messages[position].read == true)
-                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
+                statusIV.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.read,
+                        null
+                    )
+                )
             else
-                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.delivered, null))
-            /*else{
-                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
-            }*/
+                statusIV.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.blue_tick,
+                        null
+                    )
+                )
 
 
-            if (messages[position].receiverId == SpUtils.getString(context, Constants.USER_ID)){
-                if (messages[position].image.isNullOrEmpty()==false){
-                    receivedIV.visible()
-                    receivedTV.gone()
-                    setImage(messages[position].image?:"", receivedIV)
-                }
-                else{
-                    receivedIV.gone()
-                    receivedTV.visible()
-                    receivedTV.text = messages[position].message
-                }
-                receivedName.text = time
+            playIV.setOnClickListener {
+                playPauseAudio?.invoke(position)
+            }
+            sendPlayIV.setOnClickListener {
+                playPauseAudio?.invoke(position)
+            }
+
+            if (messages[position].receiverId == SpUtils.getString(context, Constants.USER_ID)) {
                 receivedLayout.visibility = View.VISIBLE
                 sentLayout.visibility = View.GONE
-                if (messages[position].gender == 1)
-                    senderDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
-                else
-                    senderDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
-            }
-            else
-            {
-                if(messages[position].image.isNullOrEmpty()==false){
-                    sendIV.visible()
-                    setImage(messages[position].image?:"", sendIV)
-                    sentTV.gone()
+                if (!messages[position].image.isNullOrEmpty()) {
+                    Log.d("lerkglkejrg", "image=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+                    receivedMsgRl.visible()
+                    receivedAudioMsgRL.gone()
+                    receivedIV.visible()
+                    senderDP.gone()
+                    setImage(messages[position].image ?: "", receivedIV)
+                } else if (!messages[position].audio.isNullOrEmpty()) {
+                    Log.d("lerkglkejrg", "audio=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+
+                    receivedMsgRl.gone()
+                    senderDP.visible()
+                    receivedAudioMsgRL.visible()
+                  if (messages[position].isPlaying == true)
+                        playIV.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                context.resources,
+                                R.drawable.pause,
+                                null
+                            )
+                        )
+                    else
+                        playIV.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                context.resources,
+                                R.drawable.play,
+                                null
+                            )
+                        )
                 }
-                else{
+                else {
+                    Log.d("lerkglkejrg", "msg=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+
+                    receivedIV.gone()
+                    receivedTV.text = messages[position].message
+                    receivedMsgRl.visible()
+                    senderDP.visible()
+                    receivedAudioMsgRL.gone()
+                }
+                receivedName.text = time
+                if (messages[position].gender == 1)
+                    senderDP.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            context.resources,
+                            R.drawable.female,
+                            null
+                        )
+                    )
+                else
+                    senderDP.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            context.resources,
+                            R.drawable.male,
+                            null
+                        )
+                    )
+            } else {
+                sentLayout.visibility = View.VISIBLE
+                receivedLayout.visibility = View.GONE
+                if (!messages[position].image.isNullOrEmpty()) {
+                    Log.d("lerkglkejrg", "image=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+
+                    sendIV.visible()
+                    setImage(messages[position].image ?: "", sendIV)
+                    msgRL.visible()
+                    myDP.gone()
+                    sentAudioMsgRL.gone()
+                } else if (!messages[position].audio.isNullOrEmpty()) {
+                    Log.d("lerkglkejrg", "audio=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+
+                    msgRL.gone()
+                    myDP.gone()
+                    sentAudioMsgRL.visible()
+                    if (messages[position].isPlaying == true)
+                        sendPlayIV.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                context.resources,
+                                R.drawable.pause,
+                                null
+                            )
+                        )
+                    else
+                        sendPlayIV.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                context.resources,
+                                R.drawable.play,
+                                null
+                            )
+                        )
+                } else {
+                    Log.d("lerkglkejrg", "message=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
+
                     sentTV.text = messages[position].message
                     sendIV.gone()
-                    sentTV.visible()
+                    msgRL.visible()
+                    sentAudioMsgRL.gone()
+                    myDP.visible()
                 }
 
                 senderName.text = time
-                sentLayout.visibility = View.VISIBLE
-                receivedLayout.visibility = View.GONE
+
                 if (messages[position].gender == 1)
-                    myDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
+                    myDP.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            context.resources,
+                            R.drawable.female,
+                            null
+                        )
+                    )
                 else
-                    myDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
+                    myDP.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            context.resources,
+                            R.drawable.male,
+                            null
+                        )
+                    )
 
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return  messages.size
+        return messages.size
     }
+
     fun unbind() {
         imageLoadingJob?.cancel()
-//        sendIV.setImageDrawable(null)
     }
 
 
-    fun setImage(image : String, imageView: ImageView){
+    fun setImage(image: String, imageView: ImageView) {
         imageLoadingJob = scope.launch {
-           val bitmap = image.base64ToBitmap()
+            val bitmap = image.base64ToBitmap()
             if (bitmap != null) {
-                withContext(Dispatchers.Main){
-                    Log.d("elrkjfejfkf", "bitmap: $bitmap")
+                withContext(Dispatchers.Main) {
                     imageView.setImageBitmap(bitmap)
                 }
             } else {

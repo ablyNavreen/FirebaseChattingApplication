@@ -65,7 +65,8 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 //pass email & password to repo method for registeration
-                val result = repository.registerUser(userData.email.toString(), userData.password.toString())
+                val result =
+                    repository.registerUser(userData.email.toString(), userData.password.toString())
                 //after sucessfull registeration save user info to firestore
                 repository.getAndSaveFCMToken { token ->  //fetch fcm token
 
@@ -76,7 +77,8 @@ class AuthViewModel @Inject constructor(
                         password = userData.password,
                         id = result?.user?.uid ?: "",
                         currentTime = getCurrentUtcDateTimeModern(),
-                        token = token)
+                        token = token
+                    )
                     addUserToFirestore(user)
                 }
 
@@ -107,9 +109,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.sendMessageToUser(message)
-                sendNotificationToUser(message,
-                    "ya29.a0Aa7pCA-pFUks3tsJH21ptn6-f6XStYbenVpYodk0y2-9H8EKmT4ecVoWcsUjM3TeYPKpN0f-ZX28jP4jrXjRMQr1ssqOSBMxf1TvYIg9ve5t4YJtDPahEd7itQojzU6Al5qB6VOW8B88WD13dnIN6QinMlB0UHgkz7_aSttL3RdwuAY96VUHRXfdJ_h37y8K6yr670oaCgYKAcwSARMSFQHGX2MiuKfvDexTcwKvVZMQthQofg0206"
-                ,message.receiverToken?:"")
+                sendNotificationToUser(message, Constants.OAUTH_ACCESS_TOKEN, message.receiverToken ?: "")
                 _authState.value = AuthState.Success("")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
@@ -184,6 +184,7 @@ class AuthViewModel @Inject constructor(
                 initialValue = emptyList() //initially list is empty
             )
     }
+
     fun getUserData(): StateFlow<List<User>> {
         val flow = repository.getUserData()
         return flow
@@ -242,7 +243,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun sendNotificationToUser(message: Message, accessToken: String, receiverFcmToken : String) {
+    fun sendNotificationToUser(message: Message, accessToken: String, receiverFcmToken: String) {
         if (!receiverFcmToken.isNullOrEmpty()) {
             viewModelScope.launch {
                 fcmSender.sendPushNotification(
@@ -256,20 +257,23 @@ class AuthViewModel @Inject constructor(
 
     fun updateFCMToken() {
         _authState.value = AuthState.Loading
-        repository.getAndSaveFCMToken { token->
+        repository.getAndSaveFCMToken { token ->
             Log.d("tokennnnnn", "updateFCMToken: $token")
             viewModelScope.launch {
-                val status = repository.updateFCMToken(SpUtils.getString(application, Constants.USER_ID)?:""
-                    , token)
+                val status = repository.updateFCMToken(
+                    SpUtils.getString(application, Constants.USER_ID) ?: "", token
+                )
 
                 when (status) {
                     is AuthState.Success -> {
                         SpUtils.saveString(application, Constants.USER_TOKEN, token)
                         _authState.value = AuthState.Success("")
                     }
+
                     is AuthState.Error -> {
                         _authState.value = AuthState.Error("Failed fetching user token.")
                     }
+
                     else -> {}
                 }
             }
@@ -280,16 +284,24 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-//                val imageUrl = repository.uploadImage(imageUri, message.senderId)
-                    val options = BitmapFactory.Options().apply { inSampleSize = 2 }
-                    val bitmap = BitmapFactory.decodeFile(imageUri, options)
-                    val outputStream = ByteArrayOutputStream()
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
-                    val imageBytes = outputStream.toByteArray()
-                    sendMessageToUser(message = message.copy(image= Base64.encodeToString(imageBytes, Base64.NO_WRAP) ))
+                val options = BitmapFactory.Options().apply { inSampleSize = 2 }
+                val bitmap = BitmapFactory.decodeFile(imageUri, options)
+                val outputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                val imageBytes = outputStream.toByteArray()
+                sendMessageToUser(
+                    message = message.copy(
+                        image = Base64.encodeToString(
+                            imageBytes,
+                            Base64.NO_WRAP
+                        )
+                    )
+                )
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Image upload failed")
             }
         }
     }
+
+
 }

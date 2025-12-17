@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.Window
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,8 +28,10 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ActivityMainBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.utils.Constants
+import com.example.firebasechattingapplication.google.GoogleOAuthHelper
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.google.TokenAcquisitionListener
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
@@ -43,11 +46,12 @@ import kotlinx.coroutines.tasks.await
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
     lateinit var navController: NavController //nav controller
     private val viewModel: AuthViewModel by viewModels()
     private var pressedTime: Long = 0
     private lateinit var binding: ActivityMainBinding
+    private lateinit var oauthHelper: GoogleOAuthHelper
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -64,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        oauthHelper = GoogleOAuthHelper(this@MainActivity)
+
+//        syncButton.setOnClickListener {
+//        oauthHelper.acquireToken(this@MainActivity, this@MainActivity)
+//        }
 
         CoroutineScope(Dispatchers.IO).launch {
             val t = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()
@@ -264,6 +273,32 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Cancel") { dialog, which ->
             }
             .show()
+    }
+
+    override fun onTokenAcquired(
+        accessToken: String,
+        refreshToken: String?,
+        idToken: String?
+    ) {
+        // Now you can call your backend function:
+        Log.i("TokenAcquisition", "Access Token acquired: $accessToken")
+
+        // This is the data you need to send to your backend server
+        val tokenMap = mapOf(
+            "accessToken" to accessToken,
+            "refreshToken" to refreshToken,
+            "idToken" to idToken
+        )
+    }
+
+    override fun onError(errorMessage: String) {
+        Log.e("TokenAcquisition", "OAuth Error: $errorMessage")
+        Toast.makeText(this, "Authentication failed: $errorMessage", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        oauthHelper.dispose()
     }
 
 }

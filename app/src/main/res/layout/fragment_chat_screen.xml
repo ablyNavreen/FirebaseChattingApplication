@@ -24,6 +24,7 @@
             android:id="@+id/backIV"
             android:layout_width="@dimen/_25sdp"
             android:layout_height="@dimen/_25sdp"
+            android:contentDescription="@string/back"
             android:src="@drawable/baseline_arrow_back_24"
             app:tint="@color/white" />
 
@@ -54,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-light"
-        android:text="No messages found!"
+        android:text="@string/no_messages_found"
         android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/topBarLayout"
         app:layout_constraintStart_toStartOf="parent"
@@ -77,6 +78,7 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
+
     <RelativeLayout
         android:id="@+id/sendMsgLayout"
         android:layout_width="0dp"
@@ -92,30 +94,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="5dp"
-            android:layout_toLeftOf="@id/sendBT"
-            android:hint="Enter message"
+            android:layout_toStartOf="@id/sendBT"
+            android:hint="@string/enter_message"
             android:textColor="@color/black" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/sendBT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/attachmentIV"
+            android:layout_toStartOf="@id/attachmentIV"
             android:background="@drawable/white_rounded_bg"
             android:backgroundTint="@color/black"
             android:fontFamily="sans-serif"
-            android:text="send"
+            android:text="@string/send"
             android:textColor="@color/white"
             android:textColorHint="@color/white" />
 
         <ImageView
             android:id="@+id/attachmentIV"
-            android:layout_width="@dimen/_30sdp"
-            android:layout_height="@dimen/_30sdp"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:layout_toStartOf="@id/recordIV"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/attachment"
+            android:src="@drawable/attachment"/>
+
+        <ImageView
+            android:id="@+id/recordIV"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="@dimen/_5sdp"
             android:layout_centerVertical="true"
-            android:src="@drawable/baseline_image_24"/>
+            android:contentDescription="@string/record"
+            android:src="@drawable/record"/>
 
     </RelativeLayout>
 

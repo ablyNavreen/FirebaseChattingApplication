@@ -21,4 +21,16 @@
     <string name="active_users">Active Users</string>
     <string name="no_users_found">No user found!</string>
     <string name="users_list">Users List</string>
+    <string name="play">Play</string>
+    <string name="send">Send</string>
+    <string name="sender">Sender</string>
+    <string name="image">Image</string>
+    <string name="status">Status</string>
+    <string name="online">Online</string>
+    <string name="typing">typing...</string>
+    <string name="enter_message">Enter message</string>
+    <string name="record">Record</string>
+    <string name="attachment">Attachment</string>
+    <string name="no_messages_found">No messages found!</string>
+    <string name="back">Back</string>
 </resources>

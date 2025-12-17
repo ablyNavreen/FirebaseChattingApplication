@@ -15,5 +15,7 @@ data class Message(
     val sentByMe: Boolean?=null,
     val senderToken: String?=null,
     val receiverToken: String?=null,
-    val image: String?=null
+    val image: String?=null,
+    val audio: String?=null,
+    var isPlaying: Boolean?=null,
 )
