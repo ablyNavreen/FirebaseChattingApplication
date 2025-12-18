@@ -14,7 +14,7 @@ import com.example.firebasechattingapplication.utils.extractFirstName
 
 class ActiveUsersAdapter (var context: Context, private val users: List<OnlineUser>) : RecyclerView.Adapter<ActiveUsersAdapter.HomeViewHolder>() {
 
-    var messageUser : ((userId : String,userName : String, userGender : Int)->Unit)?=null
+    var messageUser : ((userId : String,userName : String, userGender : Int, userToken : String)->Unit)?=null
     inner class HomeViewHolder(val binding: ActiveUserItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
@@ -31,7 +31,7 @@ class ActiveUsersAdapter (var context: Context, private val users: List<OnlineUs
                 userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
 
             baseLayout.setOnClickListener {
-                messageUser?.invoke(users[position].id.toString(),users[position].name.toString(), users[position].gender?:0)
+                messageUser?.invoke(users[position].id.toString(),users[position].name.toString(), users[position].gender?:0, users[position].token?:"")
             }
         }
     }

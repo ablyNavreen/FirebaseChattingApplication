@@ -40,6 +40,7 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
     }
 
     var playPauseAudio: ((pos: Int) -> Unit)? = null
+    var openZoomImage: ((image : String) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
         return HomeViewHolder(
             ChatMessageItemBinding.inflate(
@@ -53,8 +54,16 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
         with(holder.binding) {
+            if (messages[position].isPending == true)
+             Log.d("askncnscmasc", "onBindViewHolder:${messages[position]} ")
+            if (messages[position].isPending == true){
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.error_mark, null))
+            }
+            else if (messages[position].read == true)
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
+            else
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.blue_tick, null))
 
-//            Log.d("lerkglkejrg", "onBindViewHolder: pos $position ->  ${messages[position]}")
             val (date, time) = formatIsoDateTime(messages[position].time)
             if (lastDate == "") {
                 lastDate = date
@@ -69,25 +78,12 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
             }
             if (position == 0)
                 dateTV.visible()
-
-            if (messages[position].read == true)
-                statusIV.setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                        context.resources,
-                        R.drawable.read,
-                        null
-                    )
-                )
-            else
-                statusIV.setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                        context.resources,
-                        R.drawable.blue_tick,
-                        null
-                    )
-                )
-
-
+             sendIV.setOnClickListener {
+                openZoomImage?.invoke(messages[position].image.toString())
+            }
+            receivedIV.setOnClickListener {
+                openZoomImage?.invoke(messages[position].image.toString())
+            }
             playIV.setOnClickListener {
                 playPauseAudio?.invoke(position)
             }
@@ -99,14 +95,13 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 receivedLayout.visibility = View.VISIBLE
                 sentLayout.visibility = View.GONE
                 if (!messages[position].image.isNullOrEmpty()) {
-                    Log.d("lerkglkejrg", "image=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
                     receivedMsgRl.visible()
                     receivedAudioMsgRL.gone()
                     receivedIV.visible()
+                    receivedTV.gone()
                     senderDP.gone()
                     setImage(messages[position].image ?: "", receivedIV)
                 } else if (!messages[position].audio.isNullOrEmpty()) {
-                    Log.d("lerkglkejrg", "audio=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
 
                     receivedMsgRl.gone()
                     senderDP.visible()
@@ -129,9 +124,8 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                         )
                 }
                 else {
-                    Log.d("lerkglkejrg", "msg=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
-
                     receivedIV.gone()
+                    receivedTV.visible()
                     receivedTV.text = messages[position].message
                     receivedMsgRl.visible()
                     senderDP.visible()
@@ -158,16 +152,13 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 sentLayout.visibility = View.VISIBLE
                 receivedLayout.visibility = View.GONE
                 if (!messages[position].image.isNullOrEmpty()) {
-                    Log.d("lerkglkejrg", "image=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
-
+                    sentTV.gone()
                     sendIV.visible()
                     setImage(messages[position].image ?: "", sendIV)
                     msgRL.visible()
                     myDP.gone()
                     sentAudioMsgRL.gone()
                 } else if (!messages[position].audio.isNullOrEmpty()) {
-                    Log.d("lerkglkejrg", "audio=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
-
                     msgRL.gone()
                     myDP.gone()
                     sentAudioMsgRL.visible()
@@ -188,10 +179,9 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                             )
                         )
                 } else {
-                    Log.d("lerkglkejrg", "message=>   msg = ${messages[position].message} image = ${messages[position].image}, audio =${messages[position].audio} ")
-
                     sentTV.text = messages[position].message
                     sendIV.gone()
+                    sentTV.visible()
                     msgRL.visible()
                     sentAudioMsgRL.gone()
                     myDP.visible()

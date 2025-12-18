@@ -32,17 +32,14 @@ import com.example.firebasechattingapplication.google.GoogleOAuthHelper
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.google.TokenAcquisitionListener
+import com.example.firebasechattingapplication.utils.CommonFunctions.showSettingsDialog
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 
 @AndroidEntryPoint
@@ -58,7 +55,14 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
             if (isGranted) {
 //                showToast("Notification Permission Granted!")
             } else {
-                showToast("Notification Permission Denied. Notifications will not be shown.")
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                    showSettingsDialog(
+                        this@MainActivity,
+                        "Notifications permission is permanently denied. Please enable it in App Settings to receive message updates."
+                    )
+                } else {
+                    showToast("Notification Permission Denied. Notifications will not be shown.")
+                }
             }
         }
 
@@ -74,11 +78,10 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
 //        oauthHelper.acquireToken(this@MainActivity, this@MainActivity)
 //        }
 
-        CoroutineScope(Dispatchers.IO).launch {
+      /*  CoroutineScope(Dispatchers.IO).launch {
             val t = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()
-            Log.d("lgjjgreegri", "onCreate: ${t?.token}")
         }
-
+*/
         setStatusBarColor(window, statusBarBgView = binding.statusBarBackgroundView)
         setUpNavHost()
         binding.root.post { handleNotification() }
@@ -163,13 +166,11 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                     showToast("Press back again to exit")
                 }
             }
-
             R.id.loginFragment -> finish()
             R.id.chatsListFragment, R.id.settingsFragment -> {
                 navController.navigate(R.id.homeFragment)
                 binding.bottomNav.selectedItemId = R.id.home
             }
-
             else -> navController.popBackStack()
         }
     }
@@ -194,11 +195,11 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.loginFragment, R.id.registerFragment, R.id.chatFragment, R.id.profileFragment -> {
-                    binding.bottomNav.gone()
+                R.id.homeFragment, R.id.chatsListFragment, R.id.settingsFragment-> {
+                    binding.bottomNav.visible()
                 }
 
-                else -> binding.bottomNav.visible()
+                else -> binding.bottomNav.gone()
             }
         }
     }

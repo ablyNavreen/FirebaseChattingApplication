@@ -18,6 +18,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.WriteBatch
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
@@ -98,7 +99,8 @@ class FirebaseRepository @Inject constructor(
         isOnline: Boolean,
         isTyping: Boolean,
         lastSeen: String,
-        typingToUserId: String
+        typingToUserId: String,
+        isRecording: Boolean
     ) {
         val userId = SpUtils.getString(context, Constants.USER_ID)
         if (userId.isNullOrEmpty()) {
@@ -110,6 +112,7 @@ class FirebaseRepository @Inject constructor(
             documentRef.update("online", isOnline).await()
             documentRef.update("lastSeen", lastSeen).await()
             documentRef.update("typing", isTyping).await()
+            documentRef.update("recording", isRecording).await()
             documentRef.update("typingToUserId", typingToUserId).await()
         } catch (e: Exception) {
             if (e.message?.contains("NOT_FOUND") == true) {
@@ -171,7 +174,8 @@ class FirebaseRepository @Inject constructor(
             .document(chatId)
             .collection(Constants.MESSAGES_SUB_COLLECTION)
         // add real time snapshot Listener
-        val subscription = query.addSnapshotListener { snapshot, exception ->
+        //MetadataChanges.INCLUDE - calls listener when metadata changes -> device comes online to send pending message
+        val subscription = query.addSnapshotListener(MetadataChanges.INCLUDE) { snapshot, exception ->
             if (exception != null) {
                 Log.e("Firestore", "Listen failed for chat ${exception.message}", exception)
                 close(exception)
@@ -180,7 +184,11 @@ class FirebaseRepository @Inject constructor(
             if (snapshot != null && !snapshot.isEmpty) {
                 //Map the QuerySnapshot to a messages list
                 val messages = snapshot.documents.mapNotNull { document ->
-                    document.toObject(Message::class.java)
+                   val msg = document.toObject(Message::class.java)
+                    Log.d("askncnscmasc", "getRealTimeMessages: msg = ${msg?.message},has = ${document.metadata.hasPendingWrites()}")
+                    msg?.apply {
+                        isPending = document.metadata.hasPendingWrites()
+                    }
                 }
                 //send the new list to the Flow collector
                 trySend(messages)
@@ -313,10 +321,11 @@ class FirebaseRepository @Inject constructor(
             Log.e("Firebase", "User ID is null or empty. Cannot update status.")
             return AuthState.Error("User ID is null")
         }
-        val documentRef = firebaseFirestore.collection(USERS_COLLECTION)
-            .document(userId)
+        val documentRef = firebaseFirestore.collection(USERS_COLLECTION).document(userId)
+        val documentRef2 = firebaseFirestore.collection(ONLINE_USERS_COLLECTION).document(userId)
         return try {
             documentRef.update("token", token).await() // .await()
+            documentRef2.update("token", token).await() // .await()
             AuthState.Success("Update successful.")
         } catch (e: Exception) {
             AuthState.Error(e.message ?: "Update failed.")

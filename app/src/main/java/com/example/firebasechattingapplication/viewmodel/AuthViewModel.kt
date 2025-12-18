@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.firebasechattingapplication.firebase.FcmSender
@@ -23,6 +24,7 @@ import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +36,7 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
+/*
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: FirebaseRepository,
@@ -41,6 +44,14 @@ class AuthViewModel @Inject constructor(
     application: Application
 ) :
     AndroidViewModel(application = application) {
+*/
+
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val repository: FirebaseRepository,
+    private val fcmSender: FcmSender,
+    @ApplicationContext private val application: Context // Hilt provides this automatically
+) : ViewModel() {
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Loading)
     val authState: LiveData<AuthState> = _authState
@@ -65,11 +76,10 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 //pass email & password to repo method for registeration
-                val result =
-                    repository.registerUser(userData.email.toString(), userData.password.toString())
+                val result = repository.registerUser(userData.email.toString(), userData.password.toString())
                 //after sucessfull registeration save user info to firestore
                 repository.getAndSaveFCMToken { token ->  //fetch fcm token
-
+                    SpUtils.saveString(application, Constants.USER_TOKEN, token)
                     Log.d("tokennnnnn", "registerUser: $token")
                     val user = User(
                         name = userData.name.toString(),
@@ -109,7 +119,8 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.sendMessageToUser(message)
-                sendNotificationToUser(message, Constants.OAUTH_ACCESS_TOKEN, message.receiverToken ?: "")
+                sendNotificationToUser(message, Constants.OAUTH_ACCESS_TOKEN,
+                    message.receiverToken ?: "")
                 _authState.value = AuthState.Success("")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
@@ -219,11 +230,12 @@ class AuthViewModel @Inject constructor(
         isOnline: Boolean,
         isTyping: Boolean,
         lastSeen: String,
-        typingToUserId: String
+        typingToUserId: String,
+        isRecording : Boolean= false
     ): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            repository.updateOnlineStatus(application, isOnline, isTyping, lastSeen, typingToUserId)
+            repository.updateOnlineStatus(application, isOnline, isTyping, lastSeen, typingToUserId, isRecording)
             emit(AuthState.Success("Status updated."))
         } catch (e: Exception) {
             emit(AuthState.Error(e.message ?: "Failed to update status."))
@@ -260,13 +272,11 @@ class AuthViewModel @Inject constructor(
         repository.getAndSaveFCMToken { token ->
             Log.d("tokennnnnn", "updateFCMToken: $token")
             viewModelScope.launch {
-                val status = repository.updateFCMToken(
-                    SpUtils.getString(application, Constants.USER_ID) ?: "", token
-                )
+                SpUtils.saveString(application, Constants.USER_TOKEN, token)
+                val status = repository.updateFCMToken(SpUtils.getString(application, Constants.USER_ID) ?: "", token)
 
                 when (status) {
                     is AuthState.Success -> {
-                        SpUtils.saveString(application, Constants.USER_TOKEN, token)
                         _authState.value = AuthState.Success("")
                     }
 

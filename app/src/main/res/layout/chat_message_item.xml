@@ -74,7 +74,6 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:layout_marginTop="3dp"
-                android:text="lwkfhjkehwew"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_12ssp"/>
 
@@ -194,7 +193,7 @@
                 android:layout_height="@dimen/_15sdp"
                 android:layout_gravity="end"
                 android:contentDescription="@string/status"
-                android:src="@drawable/delivered"/>
+                android:src="@drawable/blue_tick"/>
         </LinearLayout>
 
 

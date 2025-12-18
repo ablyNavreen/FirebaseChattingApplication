@@ -53,6 +53,11 @@
         tools:layout="@layout/fragment_profile"
         android:name="com.example.firebasechattingapplication.view.fragments.ProfileFragment"
         android:label="ProfileFragment" />
+    <fragment
+        android:id="@+id/zoomImageFragment"
+        tools:layout="@layout/fragment_zoom_image"
+        android:name="com.example.firebasechattingapplication.view.fragments.ZoomImageFragment"
+        android:label="ZoomImageFragment" />
 
 
 </navigation>

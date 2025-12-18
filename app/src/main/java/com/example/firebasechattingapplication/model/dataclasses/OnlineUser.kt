@@ -11,5 +11,6 @@ data class OnlineUser (
     val gender : Int?=null,
     val currentTime : String?=null,
     val token : String?=null,
+    val recording : Boolean?=null,
 
 )

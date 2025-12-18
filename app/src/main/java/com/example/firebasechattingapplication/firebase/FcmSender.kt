@@ -44,7 +44,8 @@ class FcmSender() {
                     sender_gender = messageContent.senderGender.toString(),
                     sender_id = messageContent.senderId.toString(),
                     sender_name = messageContent.senderName.toString(),
-                    sender_token = messageContent.senderToken.toString()),
+                    sender_token = messageContent.senderToken.toString(),
+                    message = messageContent.message.toString()),
                 notification = null,
                 token = receiverToken
             )

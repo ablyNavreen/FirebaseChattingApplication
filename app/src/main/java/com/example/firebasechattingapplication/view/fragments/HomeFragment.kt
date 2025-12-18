@@ -197,11 +197,12 @@ class HomeFragment : Fragment() {
     private fun showActiveUsersList() {
         activeUsersAdapter = ActiveUsersAdapter(requireContext(), onlineUser)
         binding.activeUsersRV.adapter = activeUsersAdapter
-        activeUsersAdapter?.messageUser = { userId, userName, userGender ->
+        activeUsersAdapter?.messageUser = { userId, userName, userGender, userToken ->
             findNavController().navigate(R.id.chatFragment, Bundle().apply {
                 putString(Constants.USER_ID, userId)
                 putString(Constants.USER_NAME, userName)
                 putInt(Constants.USER_GENDER, userGender)
+                putString(Constants.USER_TOKEN, userToken)
             })
         }
     }

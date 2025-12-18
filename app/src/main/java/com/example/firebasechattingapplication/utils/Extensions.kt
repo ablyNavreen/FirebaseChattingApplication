@@ -173,13 +173,13 @@ fun encodeAudioToBase64(filePath: String): String? {
     if (!audioFile.exists())
         return null
     val fileSizeInKB = audioFile.length() / 1024
-    if (fileSizeInKB > 700) {
+    if (fileSizeInKB > 700) { //check to restrict the file size to 1 mb
         Log.e("Base64", "File too large for Firestore!")
         return null
     }
     return try {
             val bytes = audioFile.readBytes()
-            Base64.encodeToString(bytes, Base64.NO_WRAP)
+            Base64.encodeToString(bytes, Base64.NO_WRAP)  //NO_WRAP -> remove next lines from base64 data
     } catch (e: Exception) {
         e.printStackTrace()
         null
@@ -189,10 +189,10 @@ fun decodeBase64Audio(context: Context, base64Audio: String): File? {
     var tempFile : File?=null
     try {
         if (base64Audio.isNotEmpty()){
-            val audioBytes = Base64.decode(base64Audio, Base64.NO_WRAP)
+            val audioBytes = Base64.decode(base64Audio, Base64.NO_WRAP)  //convert back to byte array
              tempFile = File.createTempFile("temp_audio", ".m4a", context.cacheDir)
             val fos = FileOutputStream(tempFile)
-            fos.write(audioBytes)
+            fos.write(audioBytes)  //write to this file
             fos.close()
         }
     } catch (e: Exception) {

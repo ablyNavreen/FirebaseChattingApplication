@@ -86,6 +86,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="@dimen/_5sdp"
         android:layout_marginHorizontal="@dimen/_15sdp"
         android:layout_marginTop="@dimen/_10sdp">
 
@@ -98,17 +99,13 @@
             android:hint="@string/enter_message"
             android:textColor="@color/black" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <ImageView
             android:id="@+id/sendBT"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/_34sdp"
+            android:layout_height="@dimen/_34sdp"
             android:layout_toStartOf="@id/attachmentIV"
-            android:background="@drawable/white_rounded_bg"
-            android:backgroundTint="@color/black"
-            android:fontFamily="sans-serif"
-            android:text="@string/send"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:background="@drawable/send"
+           />
 
         <ImageView
             android:id="@+id/attachmentIV"
@@ -116,7 +113,6 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_toStartOf="@id/recordIV"
             android:layout_marginStart="@dimen/_5sdp"
-            android:layout_centerVertical="true"
             android:contentDescription="@string/attachment"
             android:src="@drawable/attachment"/>
 
@@ -126,7 +122,6 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="@dimen/_5sdp"
-            android:layout_centerVertical="true"
             android:contentDescription="@string/record"
             android:src="@drawable/record"/>
 

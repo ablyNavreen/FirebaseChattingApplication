@@ -49,20 +49,22 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                     val senderName = message.data["sender_name"]
                     val senderGender = message.data["sender_gender"]
                     val senderToken = message.data["sender_token"]
+                    val message = message.data["message"]
                     val intent = Intent(this, MainActivity::class.java)
                     intent.putExtra("sender_id", senderId)
                     intent.putExtra("sender_name", senderName)
                     intent.putExtra("sender_gender", senderGender)
                     intent.putExtra("sender_token", senderToken)
+                    intent.putExtra("message", message)
                     if (!ChatFragment.isChatOpen)
-                        makePush(intent, senderName)
+                        makePush(intent, senderName,message)
                 }
             } catch (_: Exception) {
             }
         }
     }
 
-    private fun makePush(intent: Intent?, senderName: String?) {
+    private fun makePush(intent: Intent?, senderName: String?, message: String?) {
         val pendingIntent = PendingIntent.getActivity(this, 0,
             intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
         intent?.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -72,8 +74,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setContentTitle("$senderName sent a message")
-            .setContentText("You have a new message.")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("You have a new message."))
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setAutoCancel(true)
             .setSound(soundUri)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

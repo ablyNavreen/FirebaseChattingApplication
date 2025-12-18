@@ -13,6 +13,7 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentChatListBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.Constants
+import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
@@ -25,18 +26,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
-class ChatsListFragment: Fragment() {
+class ChatsListFragment : Fragment() {
     private val messages = ArrayList<Message>()
-    private lateinit var binding : FragmentChatListBinding
+    private lateinit var binding: FragmentChatListBinding
     private val viewModel: AuthViewModel by viewModels()
 
-    private var chatsAdapter : ChatsAdapter?=null
+    private var chatsAdapter: ChatsAdapter? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentChatListBinding.inflate(layoutInflater,container, false)
+        binding = FragmentChatListBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
@@ -48,41 +49,56 @@ class ChatsListFragment: Fragment() {
     }
 
     private fun fetchAllMessages() {
-            viewModel.getAllMessages()
-                .onEach { messageList ->
-                    messages.clear()
-                   val myChats =  messageList.filter { it.senderId==SpUtils.getString(requireContext(), Constants.USER_ID)|| it.receiverId == SpUtils.getString(requireContext(), Constants.USER_ID)  }
-                    for (m in myChats){
-                        val sentByMe = if (m.senderId == SpUtils.getString(requireContext(), Constants.USER_ID)) true else false
-                        messages.add(Message(
-                            senderId = if(!sentByMe) m.senderId else m.receiverId,
-                            senderName =if(!sentByMe) m.senderName else m.receiverName,
-                            senderToken =if(!sentByMe) m.senderToken else m.receiverToken,
+        viewModel.getAllMessages()
+            .onEach { messageList ->
+                messages.clear()
+                val myChats = messageList.filter {
+                    it.senderId == SpUtils.getString(
+                        requireContext(),
+                        Constants.USER_ID
+                    ) || it.receiverId == SpUtils.getString(requireContext(), Constants.USER_ID)
+                }
+                for (m in myChats) {
+                    val sentByMe = if (m.senderId == SpUtils.getString(
+                            requireContext(),
+                            Constants.USER_ID
+                        )
+                    ) true else false
+                    messages.add(
+                        Message(
+                            senderId = if (!sentByMe) m.senderId else m.receiverId,
+                            senderName = if (!sentByMe) m.senderName else m.receiverName,
+                            senderToken = if (!sentByMe) m.senderToken else m.receiverToken,
                             time = m.time,
                             read = m.read,
                             message = m.message,
                             gender = if (!sentByMe) m.senderGender else m.receiverGender,
                             senderGender = if (!sentByMe) m.senderGender else m.receiverGender,
-                            sentByMe = sentByMe
-                        ))
+                            sentByMe = sentByMe,
+                            image = m.image,
+                            audio = m.audio
+                        )
+                    )
 
-                    }
-                    val sortedList = messages.sortedBy { it.time }.groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
-                    messages.clear()
-                    messages.addAll(sortedList.sortedByDescending { it.time })
-                    if (myChats.isNotEmpty()) {
-                        binding.noMessagesTV.gone()
-                        chatsAdapter?.notifyDataSetChanged()
-                    } else {
-                        binding.noMessagesTV.visible()
-                    }
                 }
-                .catch { e ->
-                    Log.e("Chat", "Error collecting combined messages: ${e.message}")
-                    showToast("Error loading messages.")
+                val sortedList = messages.sortedBy { it.time }
+                    .groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
+                messages.clear()
+                messages.addAll(sortedList.sortedByDescending { it.time })
+                if (myChats.isNotEmpty()) {
+                    binding.noMessagesTV.gone()
+                    chatsAdapter?.notifyDataSetChanged()
+                } else {
+                    binding.noMessagesTV.visible()
                 }
-                .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
-        }
+            }
+            .catch { e ->
+                Log.e("Chat", "Error collecting combined messages: ${e.message}")
+                showToast("Error loading messages.")
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
+    }
+
     private fun setChatsAdapter() {
         chatsAdapter = ChatsAdapter(requireContext(), messages = messages)
         binding.chatsRV.adapter = chatsAdapter
@@ -93,7 +109,8 @@ class ChatsListFragment: Fragment() {
                 putInt(Constants.USER_GENDER, userGender)
                 putString(Constants.USER_TOKEN, userToken)
             })
-    }}
-
-
+        }
     }
+
+
+}

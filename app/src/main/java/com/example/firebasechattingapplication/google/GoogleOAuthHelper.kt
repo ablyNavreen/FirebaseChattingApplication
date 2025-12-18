@@ -28,11 +28,7 @@ class GoogleOAuthHelper(private val context: Context) {
     private val authService = AuthorizationService(context)
     private var listener: TokenAcquisitionListener? = null
 
-    /**
-     * Public function to initiate the token acquisition flow.
-     * @param activity The calling Activity (needed to launch the browser intent).
-     * @param listener The callback interface for result handling.
-     */
+
     fun acquireToken(activity: Activity, listener: TokenAcquisitionListener) {
         this.listener = listener
 

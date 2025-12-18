@@ -94,4 +94,5 @@ dependencies {
     // AppAuth Library for secure OAuth flow
     implementation("net.openid:appauth:0.11.1")
 
-}
+    //zoom iamge
+    implementation("com.jsibbold:zoomage:1.3.1")}

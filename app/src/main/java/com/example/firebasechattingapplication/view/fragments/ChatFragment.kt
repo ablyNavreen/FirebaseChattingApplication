@@ -14,8 +14,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,6 +30,7 @@ import com.example.firebasechattingapplication.databinding.FragmentChatScreenBin
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
+import com.example.firebasechattingapplication.utils.CommonFunctions.showSettingsDialog
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ImagePickerUtility
 import com.example.firebasechattingapplication.utils.SpUtils
@@ -48,6 +49,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import okio.FileSystem
+import java.io.File
 import java.io.IOException
 
 
@@ -68,6 +71,8 @@ class ChatFragment : ImagePickerUtility() {
     private var lastAudioPosition: Int? = null
     var mediaPlayer: MediaPlayer? = null
     private val seekHandler = Handler()
+    private var isFirstLoad = true
+    private var currentPlayingFile : File?=null
     companion object {
         var isChatOpen = false
     }
@@ -80,6 +85,24 @@ class ChatFragment : ImagePickerUtility() {
     override fun onStop() {
         super.onStop()
         isChatOpen = false
+    }
+    private val requestAudioPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission granted! Start recording
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                updateTypingStatus(isTyping = false, isRecording = true)
+            }
+            AudioRecorderHelper.startRecording(requireContext(), binding.recordIV)
+        } else {
+            // Permission denied
+            if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                showSettingsDialog(requireContext(), "Microphone access is permanently denied. Please enable it in App Settings to send voice messages.")
+            } else {
+                showToast("Microphone permission is required to record audio.")
+            }
+        }
     }
 
     override fun onCreateView(
@@ -108,13 +131,18 @@ class ChatFragment : ImagePickerUtility() {
         }
         binding.tv.text = receiverName
         setChatsAdapter()
-        getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
+        if(isFirstLoad){  //to stop get message being called everytime i come back from zoom image fragment
+            getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
+            isFirstLoad = false
+        }
         getActiveUsers()
         setUpClickListeners()
         setupTypingDetector()
-//        updateMessageStatus(receiverId+SpUtils.getString(requireContext(), Constants.USER_ID))
     }
 
+    private fun openZoomImage(image: String) {
+        findNavController().navigate(R.id.zoomImageFragment, Bundle().apply { putString("image", image) })
+    }
     private fun getActiveUsers() {
         authViewModel.getOnlineUsers()
             .onEach { messageList ->
@@ -122,12 +150,10 @@ class ChatFragment : ImagePickerUtility() {
                 onlineUser.addAll(messageList)
                 for (m in messageList)
                     if (m.id == receiverId)
-                        if (m.typing == true && m.typingToUserId == SpUtils.getString(
-                                requireContext(),
-                                Constants.USER_ID
-                            )
-                        )
+                        if (m.typing == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
                             binding.lastSeenTV.text = getString(R.string.typing)
+                    else if (m.recording == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
+                            binding.lastSeenTV.text =getString(R.string.recording)
                         else if (m.online == true)
                             binding.lastSeenTV.text = getString(R.string.online)
                         else
@@ -184,13 +210,15 @@ class ChatFragment : ImagePickerUtility() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+
     // Requests microphone permission
     private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
+       /* ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(Manifest.permission.RECORD_AUDIO),
             REQUEST_AUDIO_PERMISSION_CODE
-        )
+        )*/
+        requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -203,18 +231,22 @@ class ChatFragment : ImagePickerUtility() {
         }
         binding.recordIV.setOnClickListener {
             if (isRecording) {
-                val audioFile =
-                    AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
+                //stop recording and send the encoded date to firestore
+                val audioFile = AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
                 val base64Audio = encodeAudioToBase64(audioFile.filePath)
                 if (base64Audio != null) {
                     sendMessage(null, base64Audio)
                 }
+                updateTypingStatus(isTyping = false, isRecording = false)
             } else {
                 if (!checkPermissions()) {
-                    requestPermissions()
+                    requestPermissions()  //request mic permission
                     return@setOnClickListener
                 }
-                AudioRecorderHelper.startRecording(requireContext(), binding.recordIV)
+                else{
+                    updateTypingStatus(isTyping = false, isRecording = true)
+                    AudioRecorderHelper.startRecording(requireContext(), binding.recordIV)
+                }
             }
         }
         binding.sendBT.setOnClickListener {
@@ -242,18 +274,15 @@ class ChatFragment : ImagePickerUtility() {
             senderToken = SpUtils.getString(requireContext(), Constants.USER_TOKEN),
             audio = base64Audio
         )
+        binding.messageET.text = null
         authViewModel.sendMessageToUser(message)
         authViewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {
                     showToast("Error while sending message. Please try again.")
                 }
-
-                AuthState.Loading -> {
-                }
-
+                AuthState.Loading -> {}
                 is AuthState.Success -> {
-                    binding.messageET.text = null
                     messagesAdapter?.notifyDataSetChanged()
                     binding.noMessagesTV.gone()
                 }
@@ -264,6 +293,9 @@ class ChatFragment : ImagePickerUtility() {
     private fun setChatsAdapter() {
         messagesAdapter = MessagesAdapter(requireContext(), messages = messages)
         binding.messagesRV.adapter = messagesAdapter
+        messagesAdapter?.openZoomImage={
+            openZoomImage(it)
+        }
         messagesAdapter?.playPauseAudio = { pos ->
             if (lastAudioPosition == null) {
                 lastAudioPosition = pos
@@ -313,6 +345,7 @@ class ChatFragment : ImagePickerUtility() {
     }
 
     private fun updatePlayStatus(pos: Int, isPlaying : Boolean){
+        //update the recycler ui
         messages[pos].isPlaying = isPlaying
         messagesAdapter?.notifyItemChanged(pos)
     }
@@ -359,14 +392,15 @@ class ChatFragment : ImagePickerUtility() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateTypingStatus(isTyping: Boolean) {
+    private fun updateTypingStatus(isTyping: Boolean, isRecording: Boolean = false) {
         lifecycleScope.launch {
             authViewModel.updateOnlineStatusFlow(
                 requireContext(),
                 true,
                 isTyping,
                 getCurrentUtcDateTimeModern(),
-                receiverId.toString()
+                receiverId.toString(),
+                isRecording = isRecording
             )
                 .collect { state ->
                     when (state) {
@@ -393,12 +427,8 @@ class ChatFragment : ImagePickerUtility() {
                 chatId
             ).collect { state ->
                 when (state) {
-                    is AuthState.Error -> {
-                        showToast(state.message)
-                    }
-
-                    AuthState.Loading -> {}
-                    is AuthState.Success -> {}
+                    is AuthState.Error -> { showToast(state.message) }
+                    else -> {}
                 }
             }
         }
@@ -407,12 +437,7 @@ class ChatFragment : ImagePickerUtility() {
 
     fun applySystemInsetsPadding(view: View) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-//            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-//            val bottomInset = imeInsets.bottom + systemInsets.bottom
-            val totalBottomInset = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()
-            ).bottom
+            val totalBottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()).bottom
             v.updatePadding(
                 left = v.paddingLeft,
                 top = v.paddingTop,
@@ -465,6 +490,7 @@ class ChatFragment : ImagePickerUtility() {
         lastAudioPosition = pos
         if (audio!=null) {
             val decodedFile = decodeBase64Audio(requireContext(), audio ?: "")
+            currentPlayingFile = decodedFile
             mediaPlayer = MediaPlayer().apply {
                 try {
                     setDataSource(decodedFile?.absolutePath)
@@ -510,6 +536,13 @@ class ChatFragment : ImagePickerUtility() {
         seekHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
         mediaPlayer = null
+        currentPlayingFile?.let {
+            if (it.exists()) {
+                it.delete()
+                Log.d("ChatFragment", "Temp audio file deleted successfully")
+            }
+        }
+        currentPlayingFile = null
     }
 
 }

@@ -53,17 +53,20 @@ abstract class ImagePickerUtility : Fragment() {
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.CAMERA,
         Manifest.permission.READ_MEDIA_IMAGES,
-        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+    )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val permissionsFor13 = arrayOf(
         Manifest.permission.READ_MEDIA_IMAGES,
-        Manifest.permission.CAMERA)
+        Manifest.permission.CAMERA
+    )
 
     private val permissions1 = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.CAMERA)
+        Manifest.permission.CAMERA
+    )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val requestMultiplePermissions =
@@ -107,7 +110,7 @@ abstract class ImagePickerUtility : Fragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = Uri.fromFile(mImageFile)
                 val picturePath = getAbsolutePath(uri)
-                selectedImage(picturePath, mCode, type,uri)
+                selectedImage(picturePath, mCode, type, uri)
             }
         }
 
@@ -126,24 +129,20 @@ abstract class ImagePickerUtility : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (hasPermissions(permissionsFor13)) {
                 imageDialog()
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                 checkPermissionDenied(Manifest.permission.CAMERA)
-            }
-            else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES) ){
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES)) {
                 checkPermissionDenied(Manifest.permission.READ_MEDIA_IMAGES)//00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000103
-            }
-            else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO) ){
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO)) {
                 checkPermissionDenied(Manifest.permission.READ_MEDIA_VIDEO)
-            }
-            else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_AUDIO)
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_AUDIO)
             ) {
                 checkPermissionDenied(Manifest.permission.READ_MEDIA_AUDIO)
-            }else{
+            } else {
                 requestPermission()
             }
-        }
-        else{
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q){
+        } else {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                 if (hasPermissions(permissions)) {
                     imageDialog()
                 } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -156,7 +155,7 @@ abstract class ImagePickerUtility : Fragment() {
                     requestPermission()
                 }
 
-            }else{
+            } else {
                 if (hasPermissions(permissions1)) {
                     imageDialog()
                 } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -173,14 +172,15 @@ abstract class ImagePickerUtility : Fragment() {
     }
 
     private fun imageDialog() {
-        mActivity=requireActivity()
+        mActivity = requireActivity()
         val dialog = Dialog(mActivity!!)
         dialog.setContentView(R.layout.camera_gallery_popup)
         val window = dialog.window
         window!!.setGravity(Gravity.BOTTOM)
         window.setLayout(
             RelativeLayout.LayoutParams.MATCH_PARENT,
-            RelativeLayout.LayoutParams.WRAP_CONTENT)
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        )
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val camera = dialog.findViewById<TextView>(R.id.tvCamera)
         val gallery = dialog.findViewById<TextView>(R.id.tvGallery)
@@ -208,8 +208,9 @@ abstract class ImagePickerUtility : Fragment() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val fileUri = FileProvider.getUriForFile(
             Objects.requireNonNull(requireActivity()),
-            "com.example.firebasechattingapplication.fileprovider", photoFile!!)
-        mImageFile= photoFile
+            "com.example.firebasechattingapplication.fileprovider", photoFile!!
+        )
+        mImageFile = photoFile
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         imageCameraLauncher.launch(intent)
@@ -227,13 +228,17 @@ abstract class ImagePickerUtility : Fragment() {
     private fun createImageFile(): File? { // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(Date())
         val mFileName = "JPEG_" + timeStamp + "_"
-        val storageDir: File = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+        val storageDir: File =
+            requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
         return File.createTempFile(mFileName, ".jpg", storageDir)
     }
 
     // util method
     private fun hasPermissions(permissions: Array<String>): Boolean = permissions.all {
-        ActivityCompat.checkSelfPermission(requireActivity()!!, it) == PackageManager.PERMISSION_GRANTED
+        ActivityCompat.checkSelfPermission(
+            requireActivity()!!,
+            it
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -242,7 +247,8 @@ abstract class ImagePickerUtility : Fragment() {
         if (shouldShowRequestPermissionRationale(permissions)) {
             val mBuilder = AlertDialog.Builder(mActivity)
             val dialog: AlertDialog =
-                mBuilder.setTitle("Permissions Required").setMessage("Please allow permissions to fetch image")
+                mBuilder.setTitle("Permissions Required")
+                    .setMessage("Please allow permissions to fetch image")
                     .setPositiveButton(
                         "Ok"
                     ) { dialog, which -> requestPermission() }
@@ -259,27 +265,27 @@ abstract class ImagePickerUtility : Fragment() {
                 )
             }
             dialog.show()
-        }
-        else {
+        } else {
             val builder = AlertDialog.Builder(mActivity)
             val dialog: AlertDialog =
-                builder.setTitle("Permissions Required").setMessage("Permission Required")
-                    .setCancelable(
-                        false
-                    )
+                builder.setTitle("Permissions Required")
+                    .setMessage("Camera and gallery permission is required to share the media in chat.")
+                    .setCancelable(false)
                     .setPositiveButton("Open settings") { dialog, which ->
                         //finish()
                         val intent = Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.fromParts(
                                 "package",
-                                "com.live.humanmesh",
+                                requireActivity().packageName,
                                 null
                             )
                         )
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         startActivity(intent)
-                    }.create()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .create()
             dialog.setOnShowListener {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
                     ContextCompat.getColor(
@@ -292,18 +298,16 @@ abstract class ImagePickerUtility : Fragment() {
     }
 
 
-
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            Log.d("jdmmhbd","hhhhhhhhhhhhh")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Log.d("jdmmhbd", "hhhhhhhhhhhhh")
             requestMultiplePermissions.launch(permissionsFor13)
-        }else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q){
-            Log.d("jdmmhbd","hhhhhhhhhhhhh")
+        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            Log.d("jdmmhbd", "hhhhhhhhhhhhh")
             requestMultiplePermissions.launch(permissions)
-        }else{
-            Log.d("jdmmhbd","kkkkkkkkkkkkkkkkkk")
+        } else {
+            Log.d("jdmmhbd", "kkkkkkkkkkkkkkkkkk")
             requestMultiplePermissions.launch(permissions1)
         }
     }
@@ -340,36 +344,42 @@ abstract class ImagePickerUtility : Fragment() {
             cursor.getString(columnIndex)
         } else null
     }
-    suspend fun convertImagePathToBase64(imagePath: String?): String? = withContext(Dispatchers.IO) {
-        if (imagePath == null) {
-            Log.e("ImageConverter", "Image path is null.")
-            return@withContext null
-        }
 
-        val imageFile = File(imagePath)
-        if (!imageFile.exists()) {
-            Log.e("ImageConverter", "File not found at path: $imagePath")
-            return@withContext null
-        }
-
-        try {
-            val options = BitmapFactory.Options()
-            options.inSampleSize = 2 // Simple downsampling
-            val bitmap = BitmapFactory.decodeFile(imagePath, options)
-            if (bitmap == null) {
-                Log.e("ImageConverter", "Could not decode file into a Bitmap.")
+    suspend fun convertImagePathToBase64(imagePath: String?): String? =
+        withContext(Dispatchers.IO) {
+            if (imagePath == null) {
+                Log.e("ImageConverter", "Image path is null.")
                 return@withContext null
             }
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream) // 70% quality
-            val imageBytes = byteArrayOutputStream.toByteArray()
-            return@withContext Base64.encodeToString(imageBytes, Base64.NO_WRAP)
 
-        } catch (e: Exception) {
-            Log.e("ImageConverter", "Error during Base64 conversion: ${e.message}", e)
-            return@withContext null
+            val imageFile = File(imagePath)
+            if (!imageFile.exists()) {
+                Log.e("ImageConverter", "File not found at path: $imagePath")
+                return@withContext null
+            }
+
+            try {
+                val options = BitmapFactory.Options()
+                options.inSampleSize = 2 // Simple downsampling
+                val bitmap = BitmapFactory.decodeFile(imagePath, options)
+                if (bitmap == null) {
+                    Log.e("ImageConverter", "Could not decode file into a Bitmap.")
+                    return@withContext null
+                }
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    70,
+                    byteArrayOutputStream
+                ) // 70% quality
+                val imageBytes = byteArrayOutputStream.toByteArray()
+                return@withContext Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+
+            } catch (e: Exception) {
+                Log.e("ImageConverter", "Error during Base64 conversion: ${e.message}", e)
+                return@withContext null
+            }
         }
-    }
 
     abstract fun selectedImage(imagePath: String?, code: Int, type: String, uri: Uri)
 
