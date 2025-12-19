@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ChatItemBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
-import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.formatIsoDateTime
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.toChatDate
@@ -35,7 +33,7 @@ class ChatsAdapter(var context: Context, private val messages: List<Message>) :
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onBindViewHolder(holder: ChatsAdapter.HomeViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
 
         with(holder.binding) {
             val (date, time) = formatIsoDateTime(messages[position].time)
@@ -76,9 +74,9 @@ class ChatsAdapter(var context: Context, private val messages: List<Message>) :
 
             usernameTV.text = messages[position].senderName
             if (!messages[position].audio.isNullOrEmpty())
-                messageTV.text = "audio"
+                messageTV.text = context.getString(R.string.audio)
             else if (!messages[position].image.isNullOrEmpty())
-                messageTV.text = "image"
+                messageTV.text = context.getString(R.string.image)
             else
                 messageTV.text = messages[position].message
             baseLayout.setOnClickListener {

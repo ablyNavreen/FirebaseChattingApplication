@@ -34,4 +34,7 @@
     <string name="no_messages_found">No messages found!</string>
     <string name="back">Back</string>
     <string name="recording">recording...</string>
+    <string name="audio">audio</string>
+    <string name="female">Female</string>
+    <string name="male">Male</string>
 </resources>

@@ -4,7 +4,6 @@ package com.example.firebasechattingapplication.utils
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.Window
 import androidx.core.graphics.drawable.toDrawable

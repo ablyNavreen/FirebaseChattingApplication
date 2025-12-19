@@ -91,6 +91,11 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onStart() {
+        super.onStart()
+        updateOnlineStatus(true)
+    }
 
     private fun handleNotification() {
         val senderId = intent.getStringExtra("sender_id")
@@ -162,7 +167,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                 if (pressedTime + 2000 > System.currentTimeMillis())
                     finish()
                 else {
-                    pressedTime = System.currentTimeMillis();
+                    pressedTime = System.currentTimeMillis()
                     showToast("Press back again to exit")
                 }
             }
@@ -208,7 +213,6 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
     private fun updateOnlineStatus(isOnline: Boolean) {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(
-                this@MainActivity,
                 isOnline,
                 false,
                 getCurrentUtcDateTimeModern(),
@@ -264,6 +268,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun showPermissionRationaleDialog() {
         AlertDialog.Builder(this@MainActivity)
             .setTitle("Notification Permission Required")

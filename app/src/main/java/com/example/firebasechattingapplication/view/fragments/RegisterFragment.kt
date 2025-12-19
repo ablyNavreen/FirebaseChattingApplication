@@ -2,14 +2,10 @@ package com.example.firebasechattingapplication.view.fragments
 
 import android.os.Build
 import android.os.Bundle
-import android.text.method.PasswordTransformationMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -55,7 +51,7 @@ class RegisterFragment : Fragment() {
                 findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
             }
             registerBT.setOnClickListener {
-                //start registeration process
+                //start registration process
                 if (validateRegister())
                     hitRegisterUser()
             }
@@ -83,7 +79,7 @@ class RegisterFragment : Fragment() {
                 showToast("Please enter password")
                 return false
             } else if (passwordET.text.toString().trim().length < 6) {
-                showToast("Password should be atleast 6 characters.")
+                showToast("Password should be least 6 characters.")
                 return false
             } else if (cpasswordET.text.toString().trim().isEmpty()) {
                 showToast("Please enter confirm password.")

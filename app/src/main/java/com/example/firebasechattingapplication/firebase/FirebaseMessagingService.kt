@@ -74,8 +74,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setContentTitle("$senderName sent a message")
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setContentText(message?:"You have a new message")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message?:"You have a new message"))
             .setAutoCancel(true)
             .setSound(soundUri)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -102,10 +102,10 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         firebaseFirestore.collection(Constants.USERS_COLLECTION).document(userId)
             .update("token", token)
             .addOnSuccessListener {
-                Log.d("kjgehgkhjegrkjhrgk", "FCM token successfully saved/updated for user $userId")
+                Log.d("firebaseFirestore", "FCM token successfully saved/updated for user $userId")
             }
             .addOnFailureListener { e ->
-                Log.d("kjgehgkhjegrkjhrgk", "Error saving FCM token for user $userId: $e")
+                Log.d("firebaseFirestore", "Error saving FCM token for user $userId: $e")
             }
     }
 

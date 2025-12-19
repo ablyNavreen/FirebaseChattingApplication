@@ -1,6 +1,5 @@
 package com.example.firebasechattingapplication.viewmodel
 
-import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,11 +7,9 @@ import android.os.Build
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.firebasechattingapplication.firebase.FcmSender
 import com.example.firebasechattingapplication.model.AuthState
@@ -35,16 +32,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
-
-/*
-@HiltViewModel
-class AuthViewModel @Inject constructor(
-    private val repository: FirebaseRepository,
-    private val fcmSender: FcmSender,
-    application: Application
-) :
-    AndroidViewModel(application = application) {
-*/
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -75,12 +62,11 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-                //pass email & password to repo method for registeration
+                //pass email & password to repo method for registration
                 val result = repository.registerUser(userData.email.toString(), userData.password.toString())
-                //after sucessfull registeration save user info to firestore
+                //after successful registration save user info to firestore
                 repository.getAndSaveFCMToken { token ->  //fetch fcm token
                     SpUtils.saveString(application, Constants.USER_TOKEN, token)
-                    Log.d("tokennnnnn", "registerUser: $token")
                     val user = User(
                         name = userData.name.toString(),
                         email = userData.email, gender = userData.gender,
@@ -135,7 +121,7 @@ class AuthViewModel @Inject constructor(
             try {
                 val result = repository.isUserLogged()
                 if (result != null)
-                    _authState.value = AuthState.Success(result.uid ?: "")
+                    _authState.value = AuthState.Success(result.uid)
                 else
                     _authState.value = AuthState.Error("Login Failed")
             } catch (e: java.lang.Exception) {
@@ -164,7 +150,7 @@ class AuthViewModel @Inject constructor(
         val flow2 = repository.getRealTimeMessages(chatId2)
         //combine the flows
         val combinedFlow = combine(flow1, flow2) { messages1, messages2 ->
-            //whenerver there is change in list by flow1 or flow2 -> we get new list
+            //whenever there is change in list by flow1 or flow2 -> we get new list
             val combined = messages1 + messages2
             //combined list is sorted and returned
             combined.sortedBy { it.time }
@@ -200,11 +186,11 @@ class AuthViewModel @Inject constructor(
         val flow = repository.getUserData()
         return flow
             .catch { e ->
-                Log.d("wkqjwqhw", "Error: ${e.message}", e)
+                Log.d("Error", "Error: ${e.message}", e)
             }
             .stateIn(  //coverts to a hot StateFlow
                 scope = viewModelScope,   //resists configuration changes
-                started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec othweise shut down
+                started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec otherwise shut down
                 initialValue = emptyList() //initially list is empty to eliminate null
             )
     }
@@ -219,14 +205,13 @@ class AuthViewModel @Inject constructor(
             }
             .stateIn(  //coverts to a hot StateFlow
                 scope = viewModelScope,   //resists configuration changes
-                started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec othweise shut down
+                started = SharingStarted.WhileSubscribed(5000),  //connection waits for observer till 5 sec otherwise shut down
                 initialValue = emptyList() //initially list is empty to eliminate null
             )
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateOnlineStatusFlow(
-        context: Context,
         isOnline: Boolean,
         isTyping: Boolean,
         lastSeen: String,
@@ -243,7 +228,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun updateMessageStatus(
-        context: Context,
         chatId: String
     ): Flow<AuthState> = flow {
         emit(AuthState.Loading)
@@ -256,7 +240,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun sendNotificationToUser(message: Message, accessToken: String, receiverFcmToken: String) {
-        if (!receiverFcmToken.isNullOrEmpty()) {
+        if (receiverFcmToken.isNotEmpty()) {
             viewModelScope.launch {
                 fcmSender.sendPushNotification(
                     accessToken = accessToken,
@@ -270,7 +254,7 @@ class AuthViewModel @Inject constructor(
     fun updateFCMToken() {
         _authState.value = AuthState.Loading
         repository.getAndSaveFCMToken { token ->
-            Log.d("tokennnnnn", "updateFCMToken: $token")
+            Log.d("updateFCMToken", "updateFCMToken: $token")
             viewModelScope.launch {
                 SpUtils.saveString(application, Constants.USER_TOKEN, token)
                 val status = repository.updateFCMToken(SpUtils.getString(application, Constants.USER_ID) ?: "", token)

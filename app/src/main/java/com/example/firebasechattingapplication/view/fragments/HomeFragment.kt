@@ -55,38 +55,17 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("tokennnnnn", "onViewCreated home: ${SpUtils.getString(requireContext(), Constants.USER_TOKEN)}")
-
         showUsersList()
         getUserData()
         showActiveUsersList()  //setup adapter
         getActiveUsers()       //fetch active users lit
-//        getFcmToken()
     }
 
-    private fun getFcmToken() {
-        viewModel.updateFCMToken()
-        viewModel.authState.observe(viewLifecycleOwner) { status ->
-            when(status){
-                is AuthState.Success -> {
-                    Log.d("kjgehgkhjegrkjhrgk", "getFcmToken: success" )
-                    ProgressIndicator.hide()
-                }
-                is AuthState.Error -> {
-                    Log.d("kjgehgkhjegrkjhrgk", "getFcmToken: Error" )
-                    ProgressIndicator.hide()
-                    showToast("Fetching token failed.")
-                }
-                AuthState.Loading ->{
-                    ProgressIndicator.show(requireContext())
-                }
-            }
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
-        updateOnlineStatus()
+//        updateOnlineStatus()
     }
 
 
@@ -94,10 +73,9 @@ class HomeFragment : Fragment() {
     private fun updateOnlineStatus() {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(
-                requireContext(),
-                true,
-                false,
-                getCurrentUtcDateTimeModern(), ""
+                isOnline = true,
+                isTyping = false,
+                lastSeen = getCurrentUtcDateTimeModern(), ""
             )
                 .collect { state ->
                     when (state) {

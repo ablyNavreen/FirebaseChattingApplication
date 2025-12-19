@@ -9,16 +9,12 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Base64
 import android.util.Log
 import android.view.Gravity
 import android.widget.RelativeLayout
@@ -28,11 +24,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import com.example.firebasechattingapplication.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -43,7 +37,6 @@ import java.util.Objects
 abstract class ImagePickerUtility : Fragment() {
 
     private var mActivity: Activity? = null
-    var mVideoDialog: Boolean = false
     private var mCode = 0
     private lateinit var mImageFile: File
     private var type = ""
@@ -181,7 +174,7 @@ abstract class ImagePickerUtility : Fragment() {
             RelativeLayout.LayoutParams.MATCH_PARENT,
             RelativeLayout.LayoutParams.WRAP_CONTENT
         )
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val camera = dialog.findViewById<TextView>(R.id.tvCamera)
         val gallery = dialog.findViewById<TextView>(R.id.tvGallery)
         val cancel = dialog.findViewById<TextView>(R.id.tv_cancel)
@@ -236,7 +229,7 @@ abstract class ImagePickerUtility : Fragment() {
     // util method
     private fun hasPermissions(permissions: Array<String>): Boolean = permissions.all {
         ActivityCompat.checkSelfPermission(
-            requireActivity()!!,
+            requireActivity(),
             it
         ) == PackageManager.PERMISSION_GRANTED
     }
@@ -301,13 +294,10 @@ abstract class ImagePickerUtility : Fragment() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Log.d("jdmmhbd", "hhhhhhhhhhhhh")
             requestMultiplePermissions.launch(permissionsFor13)
         } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            Log.d("jdmmhbd", "hhhhhhhhhhhhh")
             requestMultiplePermissions.launch(permissions)
         } else {
-            Log.d("jdmmhbd", "kkkkkkkkkkkkkkkkkk")
             requestMultiplePermissions.launch(permissions1)
         }
     }
@@ -333,53 +323,6 @@ abstract class ImagePickerUtility : Fragment() {
         return ""
     }
 
-    private fun getPath(uri: Uri?): String? {
-        val projection = arrayOf(MediaStore.Video.Media.DATA)
-        val cursor: Cursor? =
-            mActivity!!.contentResolver.query(uri!!, projection, null, null, null)
-        return if (cursor != null) {
-            val columnIndex = cursor
-                .getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
-            cursor.moveToFirst()
-            cursor.getString(columnIndex)
-        } else null
-    }
-
-    suspend fun convertImagePathToBase64(imagePath: String?): String? =
-        withContext(Dispatchers.IO) {
-            if (imagePath == null) {
-                Log.e("ImageConverter", "Image path is null.")
-                return@withContext null
-            }
-
-            val imageFile = File(imagePath)
-            if (!imageFile.exists()) {
-                Log.e("ImageConverter", "File not found at path: $imagePath")
-                return@withContext null
-            }
-
-            try {
-                val options = BitmapFactory.Options()
-                options.inSampleSize = 2 // Simple downsampling
-                val bitmap = BitmapFactory.decodeFile(imagePath, options)
-                if (bitmap == null) {
-                    Log.e("ImageConverter", "Could not decode file into a Bitmap.")
-                    return@withContext null
-                }
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                bitmap.compress(
-                    Bitmap.CompressFormat.JPEG,
-                    70,
-                    byteArrayOutputStream
-                ) // 70% quality
-                val imageBytes = byteArrayOutputStream.toByteArray()
-                return@withContext Base64.encodeToString(imageBytes, Base64.NO_WRAP)
-
-            } catch (e: Exception) {
-                Log.e("ImageConverter", "Error during Base64 conversion: ${e.message}", e)
-                return@withContext null
-            }
-        }
 
     abstract fun selectedImage(imagePath: String?, code: Int, type: String, uri: Uri)
 

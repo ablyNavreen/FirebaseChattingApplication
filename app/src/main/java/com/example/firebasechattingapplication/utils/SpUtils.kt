@@ -20,7 +20,7 @@ class SpUtils {
 
             fun getString(context: Context, key: String?): String? {
                 return getStrings(context, key, null)
-            };
+            }
 
             fun getStrings(context : Context, key: String?, defaultVal: String?): String? {
                 val settings = context.getSharedPreferences(Constants.SP_Name, Context.MODE_PRIVATE)

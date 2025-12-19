@@ -10,15 +10,11 @@ import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentLoginBinding
 import com.example.firebasechattingapplication.model.AuthState
-import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
-import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.isValidEmail
 import com.example.firebasechattingapplication.utils.showToast
-import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.flow
 
 
 @AndroidEntryPoint

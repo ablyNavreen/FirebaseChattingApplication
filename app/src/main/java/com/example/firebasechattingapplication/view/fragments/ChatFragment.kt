@@ -395,7 +395,6 @@ class ChatFragment : ImagePickerUtility() {
     private fun updateTypingStatus(isTyping: Boolean, isRecording: Boolean = false) {
         lifecycleScope.launch {
             authViewModel.updateOnlineStatusFlow(
-                requireContext(),
                 true,
                 isTyping,
                 getCurrentUtcDateTimeModern(),
@@ -422,10 +421,7 @@ class ChatFragment : ImagePickerUtility() {
     private fun updateMessageStatus(chatId: String) {
         //only one id is required -> update the received messages only
         lifecycleScope.launch {
-            authViewModel.updateMessageStatus(
-                requireContext(),
-                chatId
-            ).collect { state ->
+            authViewModel.updateMessageStatus(chatId).collect { state ->
                 when (state) {
                     is AuthState.Error -> { showToast(state.message) }
                     else -> {}
@@ -545,4 +541,8 @@ class ChatFragment : ImagePickerUtility() {
         currentPlayingFile = null
     }
 
+    override fun onDestroy() {
+        messagesAdapter?.unbind()
+        super.onDestroy()
+    }
 }

@@ -1,8 +1,6 @@
 package com.example.firebasechattingapplication.utils
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 
 object CommonFunctions {

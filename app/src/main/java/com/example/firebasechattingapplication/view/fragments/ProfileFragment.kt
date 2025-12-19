@@ -32,11 +32,11 @@ class ProfileFragment : Fragment() {
         binding.apply {
             if (SpUtils.getString(requireContext(), USER_GENDER)?.toInt()== 1){
                 profileIV.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.female, null))
-                userGenderTV.text = "Female"
+                userGenderTV.text = getString(R.string.female)
             }
             else{
                 profileIV.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.male, null))
-                userGenderTV.text = "Male"
+                userGenderTV.text = getString(R.string.male)
             }
             usernameTV.text = SpUtils.getString(requireContext(), Constants.USER_NAME)
             userEmailTv.text = SpUtils.getString(requireContext(), Constants.USER_EMAIL)

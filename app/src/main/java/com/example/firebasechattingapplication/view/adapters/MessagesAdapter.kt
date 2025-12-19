@@ -2,7 +2,6 @@ package com.example.firebasechattingapplication.view.adapters
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,8 +53,6 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
         with(holder.binding) {
-            if (messages[position].isPending == true)
-             Log.d("askncnscmasc", "onBindViewHolder:${messages[position]} ")
             if (messages[position].isPending == true){
                 statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.error_mark, null))
             }

@@ -49,7 +49,7 @@ class SettingsFragment : Fragment() {
     private fun setUpClickListeners() {
             binding.logoutLayout.setOnClickListener {
                 showYesNoDialog(requireActivity(),"Logout", "Are you sure you want to logout?", "Logout", "Cancel", onPositiveClick = {
-                    updateOnlineStatus(false)
+                    updateOnlineStatus()
                 })
             }
             binding.profileLayout.setOnClickListener {
@@ -58,12 +58,11 @@ class SettingsFragment : Fragment() {
 
     }
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateOnlineStatus(isOnline: Boolean) {
+    private fun updateOnlineStatus() {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(
-                requireContext(),
-                isOnline,
-                false,
+                isOnline = false,
+                isTyping = false,
                 getCurrentUtcDateTimeModern(),""
             )
                 .collect { state ->

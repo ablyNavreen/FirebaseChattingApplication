@@ -13,7 +13,6 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentChatListBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
@@ -59,11 +58,10 @@ class ChatsListFragment : Fragment() {
                     ) || it.receiverId == SpUtils.getString(requireContext(), Constants.USER_ID)
                 }
                 for (m in myChats) {
-                    val sentByMe = if (m.senderId == SpUtils.getString(
+                    val sentByMe = m.senderId == SpUtils.getString(
                             requireContext(),
                             Constants.USER_ID
                         )
-                    ) true else false
                     messages.add(
                         Message(
                             senderId = if (!sentByMe) m.senderId else m.receiverId,
