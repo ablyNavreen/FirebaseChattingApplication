@@ -29,7 +29,6 @@ import kotlinx.coroutines.withContext
 class MessagesAdapter(var context: Context, private val messages: List<Message>) :
     RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>() {
 
-    var lastDate = ""
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private var imageLoadingJob: Job? = null
 
@@ -62,19 +61,21 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.blue_tick, null))
 
             val (date, time) = formatIsoDateTime(messages[position].time)
-            if (lastDate == "") {
-                lastDate = date
+
+            if (position == 0) {
+                dateTV.visible()
                 dateTV.text = date.toChatDate()
             } else {
-                if (lastDate != date) {
-                    //show date
-                    lastDate = date
+                val (prevDate, prevTime) = formatIsoDateTime(messages[position - 1].time)
+                if (date != prevDate) {
+                    dateTV.visible()
                     dateTV.text = date.toChatDate()
-                } else
+                } else {
                     dateTV.gone()
+                }
             }
-            if (position == 0)
-                dateTV.visible()
+
+
              sendIV.setOnClickListener {
                 openZoomImage?.invoke(messages[position].image.toString())
             }

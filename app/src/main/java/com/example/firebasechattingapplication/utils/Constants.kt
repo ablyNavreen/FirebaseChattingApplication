@@ -14,7 +14,7 @@ object Constants {
     const val USER_EMAIL = "user_email"
     const val USER_GENDER = "user_gender"
     const val USER_TOKEN = "user_token"
-    const val OAUTH_ACCESS_TOKEN = "ya29.a0Aa7pCA-Maz2d_90MvOqNlOy2JYIiHkVFL0FANf3pabKc-p55x0YGgN6G41_Ucl1ziL709yA_tSmjaBvJ-Qhu9tYkEORPuu_KEs9i7Zc2OLu4EbXXSiyL7dmK0-3LAbIboeemUoi5pQWaoe0Af4pJhlKxCty609E-JualYkf8kxkpkVlLbutZmUQ2vbngie1p-fOyHtkaCgYKATYSARMSFQHGX2MiKsRnU1tK48r6Zu__3mdCPg0206"
+    const val OAUTH_ACCESS_TOKEN = "ya29.a0Aa7pCA8Qu08owiuX7V6YBcXGSeaixa-PrryA-OB0Q3Vx1mLax8sRQVmstrtRKDoy5-_TCd2PNB8HUt6ka_PKIHtkBZOKCpru8Rsd3fmAOtJkN5hoW1RcP08HlECr_I_GXjEcuqmfHUavf-rtpYtmZb-CCzKHKslE7xaF70ooNVl9tCN55Fhy0KSSN6-YrH7UuhKJ_IUaCgYKAXcSARMSFQHGX2Mi6spTQ0TstUQajpV_tXF2fQ0206"
     const val FCM_BASE_URL = "https://fcm.googleapis.com/"
     const val SEND_PUSH = "v1/projects/fir-chattingapplication-1de73/messages:send"
 
