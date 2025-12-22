@@ -49,13 +49,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import okio.FileSystem
 import java.io.File
 import java.io.IOException
 
 
 const val TYPING_TIMEOUT_MS = 1500L
-const val REQUEST_AUDIO_PERMISSION_CODE = 200
 
 @AndroidEntryPoint
 class ChatFragment : ImagePickerUtility() {
@@ -72,7 +70,8 @@ class ChatFragment : ImagePickerUtility() {
     var mediaPlayer: MediaPlayer? = null
     private val seekHandler = Handler()
     private var isFirstLoad = true
-    private var currentPlayingFile : File?=null
+    private var currentPlayingFile: File? = null
+
     companion object {
         var isChatOpen = false
     }
@@ -86,6 +85,7 @@ class ChatFragment : ImagePickerUtility() {
         super.onStop()
         isChatOpen = false
     }
+
     private val requestAudioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -98,7 +98,10 @@ class ChatFragment : ImagePickerUtility() {
         } else {
             // Permission denied
             if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
-                showSettingsDialog(requireContext(), "Microphone access is permanently denied. Please enable it in App Settings to send voice messages.")
+                showSettingsDialog(
+                    requireContext(),
+                    "Microphone access is permanently denied. Please enable it in App Settings to send voice messages."
+                )
             } else {
                 showToast("Microphone permission is required to record audio.")
             }
@@ -126,12 +129,14 @@ class ChatFragment : ImagePickerUtility() {
                 receiverName = requireArguments().getString(Constants.USER_NAME)
             if (requireArguments().containsKey(Constants.USER_GENDER))
                 receiverGender = requireArguments().getInt(Constants.USER_GENDER)
-            if (requireArguments().containsKey(Constants.USER_TOKEN))
+            if (requireArguments().containsKey(Constants.USER_TOKEN)) {
+                Log.d("lfkjwfkjkfwe", "onViewCreated USER_TOKEN : ${requireArguments().getString(Constants.USER_TOKEN)}")
                 receiverToken = requireArguments().getString(Constants.USER_TOKEN)
+            }
         }
         binding.tv.text = receiverName
         setChatsAdapter()
-        if(isFirstLoad){  //to stop get message being called everytime i come back from zoom image fragment
+        if (isFirstLoad) {  //to stop get message being called everytime i come back from zoom image fragment
             getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
             isFirstLoad = false
         }
@@ -143,6 +148,7 @@ class ChatFragment : ImagePickerUtility() {
     private fun openZoomImage(image: String) {
         findNavController().navigate(R.id.zoomImageFragment, Bundle().apply { putString("image", image) })
     }
+
     private fun getActiveUsers() {
         authViewModel.getOnlineUsers()
             .onEach { messageList ->
@@ -150,10 +156,18 @@ class ChatFragment : ImagePickerUtility() {
                 onlineUser.addAll(messageList)
                 for (m in messageList)
                     if (m.id == receiverId)
-                        if (m.typing == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
+                        if (m.typing == true && m.typingToUserId == SpUtils.getString(
+                                requireContext(),
+                                Constants.USER_ID
+                            )
+                        )
                             binding.lastSeenTV.text = getString(R.string.typing)
-                    else if (m.recording == true && m.typingToUserId == SpUtils.getString(requireContext(), Constants.USER_ID))
-                            binding.lastSeenTV.text =getString(R.string.recording)
+                        else if (m.recording == true && m.typingToUserId == SpUtils.getString(
+                                requireContext(),
+                                Constants.USER_ID
+                            )
+                        )
+                            binding.lastSeenTV.text = getString(R.string.recording)
                         else if (m.online == true)
                             binding.lastSeenTV.text = getString(R.string.online)
                         else
@@ -170,18 +184,20 @@ class ChatFragment : ImagePickerUtility() {
         senderId: String?,
         receiverId: String?
     ) {
+        Log.d("lfkjwfkjkfwe", "getMessages: $senderId $receiverId")
         if (senderId == null) {
             //id is null
             return
         }
 
-        authViewModel.getMessages(
-            chatId = senderId + receiverId,
-            chatId2 = receiverId + senderId
-        )
+        authViewModel.getMessages(chatId = senderId + receiverId, chatId2 = receiverId + senderId)
             .onEach { messageList ->
                 messages.clear()
                 messages.addAll(messageList)
+
+                if (receiverToken == "")
+                    fetchUserToken(messageList)
+
                 updateMessageStatus(
                     receiverId + SpUtils.getString(
                         requireContext(),
@@ -203,6 +219,19 @@ class ChatFragment : ImagePickerUtility() {
             .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }
 
+    private fun fetchUserToken(messageList: List<Message>) {
+       for(m in messageList){
+           if (m.senderId != SpUtils.getString(requireContext(), Constants.USER_ID))
+               receiverToken = m.senderToken
+           else
+               receiverToken = m.receiverToken
+           if (!receiverToken.isNullOrEmpty()){
+               Log.d("lfkjwfkjkfwe", "fetchUserToken: $receiverToken")
+               return
+           }
+       }
+    }
+
     private fun checkPermissions(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireContext(),
@@ -213,11 +242,11 @@ class ChatFragment : ImagePickerUtility() {
 
     // Requests microphone permission
     private fun requestPermissions() {
-       /* ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(Manifest.permission.RECORD_AUDIO),
-            REQUEST_AUDIO_PERMISSION_CODE
-        )*/
+        /* ActivityCompat.requestPermissions(
+             requireActivity(),
+             arrayOf(Manifest.permission.RECORD_AUDIO),
+             REQUEST_AUDIO_PERMISSION_CODE
+         )*/
         requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
@@ -232,7 +261,8 @@ class ChatFragment : ImagePickerUtility() {
         binding.recordIV.setOnClickListener {
             if (isRecording) {
                 //stop recording and send the encoded date to firestore
-                val audioFile = AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
+                val audioFile =
+                    AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
                 val base64Audio = encodeAudioToBase64(audioFile.filePath)
                 if (base64Audio != null) {
                     sendMessage(null, base64Audio)
@@ -242,8 +272,7 @@ class ChatFragment : ImagePickerUtility() {
                 if (!checkPermissions()) {
                     requestPermissions()  //request mic permission
                     return@setOnClickListener
-                }
-                else{
+                } else {
                     updateTypingStatus(isTyping = false, isRecording = true)
                     AudioRecorderHelper.startRecording(requireContext(), binding.recordIV)
                 }
@@ -267,8 +296,7 @@ class ChatFragment : ImagePickerUtility() {
             time = getCurrentUtcDateTimeModern(),
             read = false,
             gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
-            senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)
-                ?.toInt(),
+            senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
             receiverGender = receiverGender,
             receiverToken = receiverToken,
             senderToken = SpUtils.getString(requireContext(), Constants.USER_TOKEN),
@@ -281,6 +309,7 @@ class ChatFragment : ImagePickerUtility() {
                 is AuthState.Error -> {
                     showToast("Error while sending message. Please try again.")
                 }
+
                 AuthState.Loading -> {}
                 is AuthState.Success -> {
                     messagesAdapter?.notifyDataSetChanged()
@@ -293,14 +322,14 @@ class ChatFragment : ImagePickerUtility() {
     private fun setChatsAdapter() {
         messagesAdapter = MessagesAdapter(requireContext(), messages = messages)
         binding.messagesRV.adapter = messagesAdapter
-        messagesAdapter?.openZoomImage={
+        messagesAdapter?.openZoomImage = {
             openZoomImage(it)
         }
         messagesAdapter?.playPauseAudio = { pos ->
             if (lastAudioPosition == null) {
                 lastAudioPosition = pos
                 updatePlayStatus(pos, true)
-                playAudio(messages[pos].audio,pos, completed = {
+                playAudio(messages[pos].audio, pos, completed = {
                     updatePlayStatus(pos, false)
                 })
             } else {
@@ -309,10 +338,9 @@ class ChatFragment : ImagePickerUtility() {
                     if (messages[pos].isPlaying == true) {
                         updatePlayStatus(pos, false)
                         stopAudio()
-                    }
-                    else {
+                    } else {
                         updatePlayStatus(pos, true)
-                        playAudio(messages[pos].audio, pos,completed = {
+                        playAudio(messages[pos].audio, pos, completed = {
                             updatePlayStatus(pos, false)
                         })
                     }
@@ -344,7 +372,7 @@ class ChatFragment : ImagePickerUtility() {
         }
     }
 
-    private fun updatePlayStatus(pos: Int, isPlaying : Boolean){
+    private fun updatePlayStatus(pos: Int, isPlaying: Boolean) {
         //update the recycler ui
         messages[pos].isPlaying = isPlaying
         messagesAdapter?.notifyItemChanged(pos)
@@ -423,7 +451,10 @@ class ChatFragment : ImagePickerUtility() {
         lifecycleScope.launch {
             authViewModel.updateMessageStatus(chatId).collect { state ->
                 when (state) {
-                    is AuthState.Error -> { showToast(state.message) }
+                    is AuthState.Error -> {
+                        showToast(state.message)
+                    }
+
                     else -> {}
                 }
             }
@@ -433,7 +464,8 @@ class ChatFragment : ImagePickerUtility() {
 
     fun applySystemInsetsPadding(view: View) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val totalBottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()).bottom
+            val totalBottomInset =
+                insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()).bottom
             v.updatePadding(
                 left = v.paddingLeft,
                 top = v.paddingTop,
@@ -482,10 +514,10 @@ class ChatFragment : ImagePickerUtility() {
         }
     }
 
-    private fun playAudio(audio: String?,pos : Int, completed: () -> Unit) {
+    private fun playAudio(audio: String?, pos: Int, completed: () -> Unit) {
         lastAudioPosition = pos
-        if (audio!=null) {
-            val decodedFile = decodeBase64Audio(requireContext(), audio ?: "")
+        if (audio != null) {
+            val decodedFile = decodeBase64Audio(requireContext(), audio)
             currentPlayingFile = decodedFile
             mediaPlayer = MediaPlayer().apply {
                 try {
@@ -501,11 +533,11 @@ class ChatFragment : ImagePickerUtility() {
                     Log.e("MainActivity", "Playback failed: ${e.localizedMessage}")
                 }
             }
-        }
-        else{
+        } else {
             showToast("Audio file doesn't exist.")
         }
     }
+
     private fun updateSeekBar(index: Int) {
         val runnable = object : Runnable {
             override fun run() {
@@ -514,11 +546,14 @@ class ChatFragment : ImagePickerUtility() {
                     val percent = (100 * player.currentPosition) / player.duration
                     val holder = binding.messagesRV.findViewHolderForAdapterPosition(index)
                             as? MessagesAdapter.HomeViewHolder
-                    if (messages[index].receiverId == SpUtils.getString(requireContext(), Constants.USER_ID)){
+                    if (messages[index].receiverId == SpUtils.getString(
+                            requireContext(),
+                            Constants.USER_ID
+                        )
+                    ) {
                         holder?.receiverSB?.progress = percent
                         seekHandler.postDelayed(this, 500)
-                    }
-                    else{
+                    } else {
                         holder?.senderSB?.progress = percent
                         seekHandler.postDelayed(this, 500)
                     }
@@ -527,6 +562,7 @@ class ChatFragment : ImagePickerUtility() {
         }
         seekHandler.post(runnable)
     }
+
     private fun stopAudio() {
         updateSeekBar(0)
         seekHandler.removeCallbacksAndMessages(null)

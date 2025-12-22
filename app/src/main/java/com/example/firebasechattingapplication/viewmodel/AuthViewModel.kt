@@ -240,6 +240,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun sendNotificationToUser(message: Message, accessToken: String, receiverFcmToken: String) {
+        Log.d("lfkjwfkjkfwe", "sendNotificationToUser: $receiverFcmToken")
         if (receiverFcmToken.isNotEmpty()) {
             viewModelScope.launch {
                 fcmSender.sendPushNotification(
@@ -249,6 +250,7 @@ class AuthViewModel @Inject constructor(
                 )
             }
         }
+
     }
 
     fun updateFCMToken() {

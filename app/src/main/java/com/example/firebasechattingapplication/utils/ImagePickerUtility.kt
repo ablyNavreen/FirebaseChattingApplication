@@ -9,6 +9,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -96,13 +97,61 @@ abstract class ImagePickerUtility : Fragment() {
                 }
             }
         }
+    private fun rotateImageIfRequired(imageFile: File): File {
+        val path = imageFile.absolutePath
+        val ei = androidx.exifinterface.media.ExifInterface(path)
 
+        val orientation = ei.getAttributeInt(
+            androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+            androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
+        )
 
-    private val imageCameraLauncher =
+        // If it's already normal, don't waste memory processing it
+        if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL) {
+            return imageFile
+        }
+
+        val bitmap = BitmapFactory.decodeFile(path)
+        val matrix = android.graphics.Matrix()
+
+        when (orientation) {
+            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+            else -> return imageFile
+        }
+
+        val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+        )
+
+        // Overwrite the original file with the correctly rotated image
+        imageFile.outputStream().use { out ->
+            rotatedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+        }
+
+        // Important: Free up memory
+        bitmap.recycle()
+        rotatedBitmap.recycle()
+
+        return imageFile
+    }
+
+ /*   private val imageCameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = Uri.fromFile(mImageFile)
                 val picturePath = getAbsolutePath(uri)
+                selectedImage(picturePath, mCode, type, uri)
+            }
+        }*/
+
+    private val imageCameraLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val rotatedFile = rotateImageIfRequired(mImageFile)  //fix rotation of image to right
+                val uri = Uri.fromFile(rotatedFile)
+                val picturePath = rotatedFile.absolutePath
                 selectedImage(picturePath, mCode, type, uri)
             }
         }

@@ -1,7 +1,6 @@
 package com.example.firebasechattingapplication.model.repository
 
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -21,8 +20,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.WriteBatch
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -34,8 +31,7 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val firebaseFirestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
+    private val firebaseFirestore: FirebaseFirestore
 ) {
 
 
@@ -43,8 +39,6 @@ class FirebaseRepository @Inject constructor(
     suspend fun registerUser(email: String, password: String): AuthResult? {
         return firebaseAuth.createUserWithEmailAndPassword(email, password).await()
     }
-
-    //fetch all registered users
 
 
     //login user
@@ -65,7 +59,7 @@ class FirebaseRepository @Inject constructor(
 
     //save user data to database
     suspend fun addUserToFirestore(user: User) {
-        firebaseFirestore.collection(Constants.USERS_COLLECTION)
+        firebaseFirestore.collection(USERS_COLLECTION)
             .document(user.id.toString())
             .set(user).await()
     }
@@ -77,19 +71,6 @@ class FirebaseRepository @Inject constructor(
             .collection(Constants.MESSAGES_SUB_COLLECTION)
             .add(message)
             .await()
-    }
-
-
-    suspend fun uploadImage(imageUri: Uri, senderId: String?): String {
-        val storageRef: StorageReference = storage.reference
-            .child("messsage_image")
-            .child("${senderId}.jpg")
-        val uploadTask = storageRef.putFile(imageUri).await()
-        if (!uploadTask.task.isSuccessful) {
-            throw Exception("Failed to upload image to Firebase Storage.")
-        }
-        val downloadUrl = storageRef.downloadUrl.await().toString()
-        return downloadUrl
     }
 
     //manage active status

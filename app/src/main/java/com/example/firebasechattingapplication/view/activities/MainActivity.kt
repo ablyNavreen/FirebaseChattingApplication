@@ -56,10 +56,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
 //                showToast("Notification Permission Granted!")
             } else {
                 if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
-                    showSettingsDialog(
-                        this@MainActivity,
-                        "Notifications permission is permanently denied. Please enable it in App Settings to receive message updates."
-                    )
+                    showSettingsDialog(this@MainActivity, "Notifications permission is permanently denied. Please enable it in App Settings to receive message updates.")
                 } else {
                     showToast("Notification Permission Denied. Notifications will not be shown.")
                 }

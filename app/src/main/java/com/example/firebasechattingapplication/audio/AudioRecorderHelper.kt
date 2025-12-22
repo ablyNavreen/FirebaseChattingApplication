@@ -59,7 +59,7 @@ object AudioRecorderHelper {
         mRecorder?.apply {
             try {
                 stop()
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 // called too early - not enough recording to be saved
                 Log.e("AudioRecorder", "Stop failed: Recording was too short or not initialized.")
             } finally {

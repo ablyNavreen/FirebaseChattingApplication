@@ -37,7 +37,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 
@@ -95,4 +95,10 @@ dependencies {
     implementation("net.openid:appauth:0.11.1")
 
     //zoom iamge
-    implementation("com.jsibbold:zoomage:1.3.1")}
+    implementation("com.jsibbold:zoomage:1.3.1")
+
+    //glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    ksp("com.github.bumptech.glide:ksp:4.16.0")
+
+}

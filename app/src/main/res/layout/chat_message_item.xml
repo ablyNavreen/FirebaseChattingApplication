@@ -192,8 +192,7 @@
                 android:layout_width="@dimen/_15sdp"
                 android:layout_height="@dimen/_15sdp"
                 android:layout_gravity="end"
-                android:contentDescription="@string/status"
-                android:src="@drawable/blue_tick"/>
+                android:contentDescription="@string/status" />
         </LinearLayout>
 
 

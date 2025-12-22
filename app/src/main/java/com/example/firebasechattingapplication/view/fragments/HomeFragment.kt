@@ -13,13 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentHomeBinding
-import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
-import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
@@ -30,7 +27,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -69,7 +65,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
+  /*  @RequiresApi(Build.VERSION_CODES.O)
     private fun updateOnlineStatus() {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(
@@ -86,7 +82,7 @@ class HomeFragment : Fragment() {
                     }
                 }
         }
-    }
+    }*/
 
     private fun getActiveUsers() {
         viewModel.getOnlineUsers()
@@ -96,8 +92,12 @@ class HomeFragment : Fragment() {
                 val activeUsers = messageList.filter { it.online == true && it.name!=null }
                 onlineUser.addAll(activeUsers)
                 if (activeUsers.size > 0)
-                    binding.activeUsersTV.text =
-                        getString(R.string.active_users) + "(" + onlineUser.size + ")"
+                    binding.activeUsersTV.text = buildString {
+                        append(getString(R.string.active_users))
+                        append("(")
+                        append(onlineUser.size)
+                        append(")")
+                    }
                 else
                     binding.activeUsersTV.text = getString(R.string.active_users)
                 if (onlineUser.isNotEmpty()) {
@@ -119,7 +119,6 @@ class HomeFragment : Fragment() {
     private fun getUserData() {
       viewModel.getUserData()
             .onEach { userList ->
-                Log.d("wkqjwqhw", "getUserData: ${userList.size}")
                 allUsers.clear()
                 val userData = userList.filter { it.id == SpUtils.getString(requireContext(), Constants.USER_ID) }
                 if (userData.isNotEmpty()) {

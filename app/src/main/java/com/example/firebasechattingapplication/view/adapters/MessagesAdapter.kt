@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ChatMessageItemBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
@@ -53,7 +54,7 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
         with(holder.binding) {
             if (messages[position].isPending == true){
-                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.error_mark, null))
+                statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.clock, null))
             }
             else if (messages[position].read == true)
                 statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
@@ -66,7 +67,7 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 dateTV.visible()
                 dateTV.text = date.toChatDate()
             } else {
-                val (prevDate, prevTime) = formatIsoDateTime(messages[position - 1].time)
+                val (prevDate, _) = formatIsoDateTime(messages[position - 1].time)
                 if (date != prevDate) {
                     dateTV.visible()
                     dateTV.text = date.toChatDate()
@@ -222,6 +223,9 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
             val bitmap = image.base64ToBitmap()
             if (bitmap != null) {
                 withContext(Dispatchers.Main) {
+//                    Glide.with(context)
+//                        .load(bitmap)
+//                        .into(imageView)
                     imageView.setImageBitmap(bitmap)
                 }
             } else {

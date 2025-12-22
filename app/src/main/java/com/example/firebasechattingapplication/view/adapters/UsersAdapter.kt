@@ -29,7 +29,7 @@ class UsersAdapter (var context: Context, private val users: List<User>) : Recyc
                 userIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
             baseLayout.setOnClickListener {
                 messageUser?.invoke(users[position].id.toString(),users[position].name.toString()
-                    , users[position].gender ?:0, users[position].token?:"")
+                    , users[position].gender ?:0, users[position].token.toString())
             }
         }
     }

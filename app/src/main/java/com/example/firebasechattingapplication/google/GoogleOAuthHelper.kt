@@ -10,16 +10,15 @@ import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ResponseTypeValues
+import androidx.core.net.toUri
 
-class GoogleOAuthHelper(private val context: Context) {
+class GoogleOAuthHelper(context: Context) {
 
 
     // IMPORTANT: Use the Client ID and Redirect URI configured in your console and manifest
     private val CLIENT_ID = "192786858308-8h0oqh00go7b3rn7rgrl33muvm6923u5.apps.googleusercontent.com"
     private val REDIRECT_URI = "com.example.firebasechattingapplication:/oauth2redirect"
-    private val SCOPES = listOf(
-        "https://www.googleapis.com/auth/firebase.messaging",
-    ).joinToString(" ")
+    private val SCOPES = listOf("https://www.googleapis.com/auth/firebase.messaging").joinToString(" ")
 
     private val authService = AuthorizationService(context)
     private var listener: TokenAcquisitionListener? = null
@@ -29,14 +28,14 @@ class GoogleOAuthHelper(private val context: Context) {
         this.listener = listener
 
         val serviceConfiguration = AuthorizationServiceConfiguration(
-            Uri.parse("https://accounts.google.com/o/oauth2/v2/auth"),
-            Uri.parse("https://oauth2.googleapis.com/token")
+            "https://accounts.google.com/o/oauth2/v2/auth".toUri(),
+            "https://oauth2.googleapis.com/token".toUri()
         )
         val authRequest = AuthorizationRequest.Builder(
             serviceConfiguration,
             CLIENT_ID,
             ResponseTypeValues.CODE,
-            Uri.parse(REDIRECT_URI)
+            REDIRECT_URI.toUri()
         )
             .setScope(SCOPES)
             .setAdditionalParameters(mapOf("access_type" to "offline")) // Request Refresh Token
