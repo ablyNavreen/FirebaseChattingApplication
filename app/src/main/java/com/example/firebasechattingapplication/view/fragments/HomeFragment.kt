@@ -15,10 +15,10 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentHomeBinding
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.gone
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.view.adapters.ActiveUsersAdapter
 import com.example.firebasechattingapplication.view.adapters.UsersAdapter
@@ -111,7 +111,7 @@ class HomeFragment : Fragment() {
             }
             .catch { e ->
                 Log.e("Chat", "Error collecting getActiveUsers : ${e.message}")
-                showToast("Error loading messages.")
+                showToast(requireContext(),"Error loading messages.")
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }

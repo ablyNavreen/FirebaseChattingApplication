@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.model.dataclasses.AudioRecording
-import com.example.firebasechattingapplication.utils.showToast
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat

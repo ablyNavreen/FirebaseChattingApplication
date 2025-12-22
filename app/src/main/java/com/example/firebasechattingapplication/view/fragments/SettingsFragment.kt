@@ -14,10 +14,10 @@ import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentSettingsBinding
 import com.example.firebasechattingapplication.model.AuthState
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
+import com.example.firebasechattingapplication.utils.CommonFunctions.showYesNoDialog
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
-import com.example.firebasechattingapplication.utils.showToast
-import com.example.firebasechattingapplication.utils.showYesNoDialog
 import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +69,7 @@ class SettingsFragment : Fragment() {
                     when (state) {
                         is AuthState.Error -> {
                             ProgressIndicator.hide()
-                            showToast(state.message)
+                            showToast(requireContext(),state.message)
                         }
                         AuthState.Loading -> {
                             ProgressIndicator.show(requireContext())

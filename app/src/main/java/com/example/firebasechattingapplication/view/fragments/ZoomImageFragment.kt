@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentZoomImageBinding
-import com.example.firebasechattingapplication.utils.base64ToBitmap
+import com.example.firebasechattingapplication.view.adapters.base64ToBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -35,18 +35,6 @@ fun isValidEmail(email: String): Boolean {
     return Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
-fun Fragment.showToast(message : String ){
-    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-}
-
-fun Activity.showToast(message : String ){
-    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-
-}
-fun showToast(context: Context, message : String ){
-    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-
-}
 
 fun View.visible(){
     this.visibility = View.VISIBLE
@@ -64,21 +52,6 @@ fun getCurrentUtcDateTimeModern(): String {
     return formatter.format(nowUtc)
 }
 
-fun showYesNoDialog(context: Context, title : String, message : String, positiveBT: String, negativeBT : String, onPositiveClick : (()->Unit)?=null) {
-    val builder = AlertDialog.Builder(context)
-    builder.setTitle(title)
-    builder.setMessage(message)
-    builder.setCancelable(false)
-    builder.setPositiveButton(positiveBT) { dialog: DialogInterface, which: Int ->
-        onPositiveClick?.invoke()
-        dialog.dismiss()
-    }
-    builder.setNegativeButton(negativeBT) { dialog: DialogInterface, which: Int ->
-        dialog.dismiss()
-    }
-    val dialog: AlertDialog = builder.create()
-    dialog.show()
-}
 
 fun String.toTimestampMillis(): Long {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
@@ -158,45 +131,27 @@ fun String.extractFirstName(): String? {
     }
 }
 
-suspend fun String.base64ToBitmap(): Bitmap? = withContext(Dispatchers.IO) {
-    return@withContext try {
-        val imageBytes = Base64.decode(this@base64ToBitmap, Base64.DEFAULT)
-        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
 
 fun encodeAudioToBase64(filePath: String): String? {
     val audioFile = File(filePath)
     if (!audioFile.exists())
         return null
     val fileSizeInKB = audioFile.length() / 1024
+    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${(audioFile.length())/1024}")
     if (fileSizeInKB > 700) { //check to restrict the file size to 1 mb
         Log.e("Base64", "File too large for Firestore!")
         return null
     }
     return try {
             val bytes = audioFile.readBytes()
-            Base64.encodeToString(bytes, Base64.NO_WRAP)  //NO_WRAP -> remove next lines from base64 data
+            val ff =Base64.encodeToString(bytes, Base64.NO_WRAP)  //NO_WRAP -> remove next lines from base64 data    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${audioFile.length()}")
+        Log.d("lwkehjnkejhfh", "encodeAudioToBase64: after = ${(ff.length)/1024}")
+
+
+        ff
     } catch (e: Exception) {
         e.printStackTrace()
         null
     }
 }
-fun decodeBase64Audio(context: Context, base64Audio: String): File? {
-    var tempFile : File?=null
-    try {
-        if (base64Audio.isNotEmpty()){
-            val audioBytes = Base64.decode(base64Audio, Base64.NO_WRAP)  //convert back to byte array
-             tempFile = File.createTempFile("temp_audio", ".m4a", context.cacheDir)
-            val fos = FileOutputStream(tempFile)
-            fos.write(audioBytes)  //write to this file
-            fos.close()
-        }
-    } catch (e: Exception) {
-        Log.e("AudioPlayer", "Error playing audio: ${e.message}")
-    }
-    return tempFile
-}
+

@@ -10,9 +10,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentLoginBinding
 import com.example.firebasechattingapplication.model.AuthState
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.isValidEmail
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -60,7 +60,7 @@ class LoginFragment : Fragment() {
             when(it){
                 is AuthState.Error -> {
                     ProgressIndicator.hide()
-                    showToast("The username or password you entered is incorrect. Please try again.")
+                    showToast(requireContext(),"The username or password you entered is incorrect. Please try again.")
                 }
                 AuthState.Loading -> {
                     ProgressIndicator.show(requireContext())
@@ -76,13 +76,13 @@ class LoginFragment : Fragment() {
     fun validateData() : Boolean {  //checks for login validations
         binding.apply {
             if (emailET.text.toString().trim().isEmpty()) {
-                showToast("Please enter email address")
+                showToast(requireContext(),"Please enter email address")
                 return false
             }  else if (! isValidEmail(emailET.text.toString().trim())) {
-                showToast("Please enter valid email address")
+                showToast(requireContext(),"Please enter valid email address")
                 return false
             }else if (passwordET.text.toString().trim().isEmpty()) {
-                showToast("Please enter password")
+                showToast(requireContext(),"Please enter password")
                 return false
             } else {
               return true

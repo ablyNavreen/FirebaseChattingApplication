@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -107,7 +108,7 @@ class AuthViewModel @Inject constructor(
                 repository.sendMessageToUser(message)
                 sendNotificationToUser(message, Constants.OAUTH_ACCESS_TOKEN,
                     message.receiverToken ?: "")
-                _authState.value = AuthState.Success("")
+                _authState.value = AuthState.Success(message.senderId.toString())
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
@@ -280,10 +281,11 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
+                //with compressing image
                 val options = BitmapFactory.Options().apply { inSampleSize = 2 }
                 val bitmap = BitmapFactory.decodeFile(imageUri, options)
                 val outputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
                 val imageBytes = outputStream.toByteArray()
                 sendMessageToUser(
                     message = message.copy(
@@ -293,6 +295,17 @@ class AuthViewModel @Inject constructor(
                         )
                     )
                 )
+
+
+                //without compressing
+              /*  val imageFile = File(imageUri) // Ensure imageUri is the file path string
+                val originalSizeMB = imageFile.length() / (1024.0 * 1024.0)
+                Log.d("lwkehjnkejhfh", "uploadImage: before = $originalSizeMB")
+                val imageBytes = imageFile.readBytes()
+                val base64String = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+                val encodedSizeMB = base64String.length / (1024.0 * 1024.0)
+                Log.d("lwkehjnkejhfh", "uploadImage: after = $encodedSizeMB")
+                sendMessageToUser(message = message.copy(image = base64String))*/
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Image upload failed")
             }

@@ -30,15 +30,15 @@ import com.example.firebasechattingapplication.databinding.FragmentChatScreenBin
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
+import com.example.firebasechattingapplication.utils.CommonFunctions.decodeBase64Audio
 import com.example.firebasechattingapplication.utils.CommonFunctions.showSettingsDialog
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ImagePickerUtility
 import com.example.firebasechattingapplication.utils.SpUtils
-import com.example.firebasechattingapplication.utils.decodeBase64Audio
 import com.example.firebasechattingapplication.utils.encodeAudioToBase64
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.toLastSeenTime
 import com.example.firebasechattingapplication.utils.toTimestampMillis
 import com.example.firebasechattingapplication.utils.visible
@@ -103,7 +103,7 @@ class ChatFragment : ImagePickerUtility() {
                     "Microphone access is permanently denied. Please enable it in App Settings to send voice messages."
                 )
             } else {
-                showToast("Microphone permission is required to record audio.")
+                showToast(requireContext(),"Microphone permission is required to record audio.")
             }
         }
     }
@@ -175,7 +175,7 @@ class ChatFragment : ImagePickerUtility() {
                                 m.lastSeen?.toTimestampMillis()?.toLastSeenTime()
             }
             .catch { e ->
-                showToast("Error loading messages.")
+                showToast(requireContext(),"Error loading messages.")
             }.launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }
 
@@ -214,7 +214,7 @@ class ChatFragment : ImagePickerUtility() {
             }
             .catch { e ->
                 Log.e("Chat", "Error collecting combined messages: ${e.message}")
-                showToast("Error loading messages.")
+                showToast(requireContext(),"Error loading messages.")
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }
@@ -307,7 +307,7 @@ class ChatFragment : ImagePickerUtility() {
         authViewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Error -> {
-                    showToast("Error while sending message. Please try again.")
+                    showToast(requireContext(),"Error while sending message. Please try again.")
                 }
 
                 AuthState.Loading -> {}
@@ -432,7 +432,7 @@ class ChatFragment : ImagePickerUtility() {
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            showToast(state.message)
+                            showToast(requireContext(),state.message)
                         }
 
                         AuthState.Loading -> {
@@ -452,7 +452,7 @@ class ChatFragment : ImagePickerUtility() {
             authViewModel.updateMessageStatus(chatId).collect { state ->
                 when (state) {
                     is AuthState.Error -> {
-                        showToast(state.message)
+                        showToast(requireContext(), state.message)
                     }
 
                     else -> {}
@@ -498,7 +498,7 @@ class ChatFragment : ImagePickerUtility() {
             authViewModel.authState.observe(viewLifecycleOwner) { state ->
                 when (state) {
                     is AuthState.Error -> {
-                        showToast("Error while sending message. Please try again.")
+                        showToast(requireContext(),"Error while sending message. Please try again.")
                     }
 
                     AuthState.Loading -> {
@@ -534,7 +534,7 @@ class ChatFragment : ImagePickerUtility() {
                 }
             }
         } else {
-            showToast("Audio file doesn't exist.")
+            showToast(requireContext(),"Audio file doesn't exist.")
         }
     }
 

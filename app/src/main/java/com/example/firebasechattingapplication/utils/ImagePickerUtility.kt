@@ -127,10 +127,9 @@ abstract class ImagePickerUtility : Fragment() {
 
         // Overwrite the original file with the correctly rotated image
         imageFile.outputStream().use { out ->
-            rotatedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+            rotatedBitmap
+//            rotatedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
         }
-
-        // Important: Free up memory
         bitmap.recycle()
         rotatedBitmap.recycle()
 

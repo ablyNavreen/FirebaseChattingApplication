@@ -13,11 +13,11 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentRegisterBinding
 import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.model.dataclasses.User
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.isValidEmail
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -62,30 +62,30 @@ class RegisterFragment : Fragment() {
         //checks register validations
         binding.apply {
             if (nameET.text.toString().isEmpty()) {
-                showToast("Please enter name")
+                showToast(requireContext(),"Please enter name")
                 return false
             }  else if (!maleCB.isChecked && !femaleCB.isChecked) {
-                showToast("Please select gender")
+                showToast(requireContext(),"Please select gender")
                 return false
             }
             else if (emailET.text.toString().trim().isEmpty()) {
-                showToast("Please enter email address")
+                showToast(requireContext(),"Please enter email address")
                 return false
             } else if (! isValidEmail(emailET.text.toString().trim())) {
-                showToast("Please enter valid email address")
+                showToast(requireContext(),"Please enter valid email address")
                 return false
             }
             else if (passwordET.text.toString().trim().isEmpty()) {
-                showToast("Please enter password")
+                showToast(requireContext(),"Please enter password")
                 return false
             } else if (passwordET.text.toString().trim().length < 6) {
-                showToast("Password should be least 6 characters.")
+                showToast(requireContext(),"Password should be least 6 characters.")
                 return false
             } else if (cpasswordET.text.toString().trim().isEmpty()) {
-                showToast("Please enter confirm password.")
+                showToast(requireContext(),"Please enter confirm password.")
                 return false
             } else if (passwordET.text.toString().trim() != cpasswordET.text.toString().trim()) {
-                showToast("Password and confirm password are not same.")
+                showToast(requireContext(),"Password and confirm password are not same.")
                 return false
             } else {
                 return true
@@ -107,7 +107,7 @@ class RegisterFragment : Fragment() {
             when (state) {
                 is AuthState.Error -> {
                     ProgressIndicator.hide()
-                    showToast("Failed to register. Please try again later.")
+                    showToast(requireContext(),"Failed to register. Please try again later.")
                 }
                 AuthState.Loading -> {
                     ProgressIndicator.show(requireContext())

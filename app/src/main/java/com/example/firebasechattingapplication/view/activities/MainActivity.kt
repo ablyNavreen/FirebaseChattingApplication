@@ -33,9 +33,9 @@ import com.example.firebasechattingapplication.utils.ProgressIndicator
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.google.TokenAcquisitionListener
 import com.example.firebasechattingapplication.utils.CommonFunctions.showSettingsDialog
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                 if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
                     showSettingsDialog(this@MainActivity, "Notifications permission is permanently denied. Please enable it in App Settings to receive message updates.")
                 } else {
-                    showToast("Notification Permission Denied. Notifications will not be shown.")
+                    showToast(this@MainActivity,"Notification Permission Denied. Notifications will not be shown.")
                 }
             }
         }
@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                 when (state) {
                     is AuthState.Error -> {
                         ProgressIndicator.hide()
-                        showToast("Session expired. Please login.")
+                        showToast(this@MainActivity,"Session expired. Please login.")
                         navController.navigate(R.id.loginFragment)
                     }
 
@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                     finish()
                 else {
                     pressedTime = System.currentTimeMillis()
-                    showToast("Press back again to exit")
+                    showToast(this@MainActivity,"Press back again to exit")
                 }
             }
             R.id.loginFragment -> finish()
@@ -218,7 +218,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
-                            showToast(state.message)
+                            showToast(this@MainActivity,state.message)
                         }
 
                         else -> {}

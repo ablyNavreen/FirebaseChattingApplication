@@ -12,10 +12,10 @@ import androidx.navigation.fragment.findNavController
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentChatListBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
+import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.utils.gone
-import com.example.firebasechattingapplication.utils.showToast
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.view.adapters.ChatsAdapter
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
@@ -73,14 +73,13 @@ class ChatsListFragment : Fragment() {
                             gender = if (!sentByMe) m.senderGender else m.receiverGender,
                             senderGender = if (!sentByMe) m.senderGender else m.receiverGender,
                             sentByMe = sentByMe,
-                            image = m.image,
+                            image = m.image?:"",
                             audio = m.audio
                         )
                     )
 
                 }
-                val sortedList = messages.sortedBy { it.time }
-                    .groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
+                val sortedList = messages.sortedBy { it.time }.groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
                 messages.clear()
                 messages.addAll(sortedList.sortedByDescending { it.time })
                 if (myChats.isNotEmpty()) {
@@ -92,7 +91,7 @@ class ChatsListFragment : Fragment() {
             }
             .catch { e ->
                 Log.e("Chat", "Error collecting combined messages: ${e.message}")
-                showToast("Error loading messages.")
+                showToast(requireContext(),"Error loading messages.")
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)  //starts collection -> tied to view
     }

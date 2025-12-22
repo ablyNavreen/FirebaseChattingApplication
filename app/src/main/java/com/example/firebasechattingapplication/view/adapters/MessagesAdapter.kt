@@ -1,7 +1,10 @@
 package com.example.firebasechattingapplication.view.adapters
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +19,6 @@ import com.example.firebasechattingapplication.databinding.ChatMessageItemBindin
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.SpUtils
-import com.example.firebasechattingapplication.utils.base64ToBitmap
 import com.example.firebasechattingapplication.utils.formatIsoDateTime
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.toChatDate
@@ -234,5 +236,15 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
         }
     }
 
+}
+
+suspend fun String.base64ToBitmap(): Bitmap? = withContext(Dispatchers.IO) {
+    return@withContext try {
+        val imageBytes = Base64.decode(this@base64ToBitmap, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
