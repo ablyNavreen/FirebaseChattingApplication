@@ -44,7 +44,32 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/deleteLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingVertical="@dimen/_8sdp"
+        android:background="@drawable/white_rounded_bg"
+        android:layout_marginTop="@dimen/_15sdp">
+        <ImageView
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:src="@drawable/baseline_delete_24"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/delete_account"
+            android:layout_marginStart="@dimen/_15sdp"
+            android:textSize="@dimen/_14ssp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textColor="@color/black"/>
 
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/logoutLayout"
@@ -62,7 +87,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Logout"
+            android:text="@string/logout"
             android:layout_marginStart="@dimen/_15sdp"
             android:textSize="@dimen/_14ssp"
             android:fontFamily="sans-serif-medium"

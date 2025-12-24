@@ -39,7 +39,6 @@
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif-medium"
             android:layout_centerVertical="true"
-            android:text="User Name"
             android:textColor="@color/black"
             android:textSize="@dimen/_13ssp" />
 

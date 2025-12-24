@@ -47,7 +47,7 @@ abstract class ImagePickerUtility : Fragment() {
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.CAMERA,
         Manifest.permission.READ_MEDIA_IMAGES,
-        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED  //permission for android 14 -> need to handle the selected photos
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -65,33 +65,20 @@ abstract class ImagePickerUtility : Fragment() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val requestMultiplePermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-
             if (permissions.isNotEmpty()) {
-                permissions.entries.forEach {
-                    Log.d("permissions", "${it.key} = ${it.value}")
-                }
-
                 val readStorage = permissions[Manifest.permission.READ_EXTERNAL_STORAGE]
                 val writeStorage = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
                 val camera = permissions[Manifest.permission.CAMERA]
-
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                     if (camera == true) {
-                        Log.e("permissions", "Permission Granted Successfully")
                         imageDialog()
-
                     } else {
-                        Log.e("permissions", "Permission not granted")
                         checkPermissionDenied(permissions.keys.first())
                     }
-
                 } else {
                     if (readStorage == true && writeStorage == true && camera == true) {
-                        Log.e("permissions", "Permission Granted Successfully")
                         imageDialog()
-
                     } else {
-                        Log.e("permissions", "Permission not granted")
                         checkPermissionDenied(permissions.keys.first())
                     }
                 }
@@ -127,8 +114,7 @@ abstract class ImagePickerUtility : Fragment() {
 
         // Overwrite the original file with the correctly rotated image
         imageFile.outputStream().use { out ->
-            rotatedBitmap
-//            rotatedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+            rotatedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, out)  //compress
         }
         bitmap.recycle()
         rotatedBitmap.recycle()
@@ -136,21 +122,19 @@ abstract class ImagePickerUtility : Fragment() {
         return imageFile
     }
 
- /*   private val imageCameraLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uri = Uri.fromFile(mImageFile)
-                val picturePath = getAbsolutePath(uri)
-                selectedImage(picturePath, mCode, type, uri)
-            }
-        }*/
-
     private val imageCameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val rotatedFile = rotateImageIfRequired(mImageFile)  //fix rotation of image to right
                 val uri = Uri.fromFile(rotatedFile)
                 val picturePath = rotatedFile.absolutePath
+
+
+                val sizeInBytes = rotatedFile.length() // size in Bytes
+                val sizeInKB = sizeInBytes / 1024
+
+                Log.d("lerkglkejrg", "Camera Image Size: $sizeInKB KB")
+
                 selectedImage(picturePath, mCode, type, uri)
             }
         }
@@ -160,6 +144,15 @@ abstract class ImagePickerUtility : Fragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data
                 val picturePath = getAbsolutePath(uri!!)
+
+                // Get size using ContentResolver
+                val inputStream = requireActivity().contentResolver.openAssetFileDescriptor(uri, "r")
+                val sizeInBytes = inputStream?.length ?: 0
+                val sizeInKB = sizeInBytes / 1024
+                inputStream?.close()
+
+                Log.d("lerkglkejrg", "Gallery Image Size: $sizeInKB KB")
+
                 selectedImage(picturePath, mCode, type, uri)
             }
         }
@@ -174,12 +167,8 @@ abstract class ImagePickerUtility : Fragment() {
                 checkPermissionDenied(Manifest.permission.CAMERA)
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES)) {
                 checkPermissionDenied(Manifest.permission.READ_MEDIA_IMAGES)//00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000103
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO)) {
-                checkPermissionDenied(Manifest.permission.READ_MEDIA_VIDEO)
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_AUDIO)
-            ) {
-                checkPermissionDenied(Manifest.permission.READ_MEDIA_AUDIO)
-            } else {
+            }
+            else {
                 requestPermission()
             }
         } else {

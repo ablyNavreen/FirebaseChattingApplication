@@ -37,4 +37,6 @@
     <string name="audio">audio</string>
     <string name="female">Female</string>
     <string name="male">Male</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="logout">Logout</string>
 </resources>

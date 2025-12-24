@@ -13,12 +13,11 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.ChatMessageItemBinding
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.utils.formatIsoDateTime
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.toChatDate
@@ -29,8 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MessagesAdapter(var context: Context, private val messages: List<Message>) :
-    RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>() {
+class MessagesAdapter(var context: Context, private val messages: List<Message>) : RecyclerView.Adapter<MessagesAdapter.HomeViewHolder>() {
 
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private var imageLoadingJob: Job? = null
@@ -43,21 +41,14 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
     var playPauseAudio: ((pos: Int) -> Unit)? = null
     var openZoomImage: ((image : String) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
-        return HomeViewHolder(
-            ChatMessageItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
+        return HomeViewHolder(ChatMessageItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
         with(holder.binding) {
-            if (messages[position].isPending == true){
+            if (messages[position].isPending == true)
                 statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.clock, null))
-            }
             else if (messages[position].read == true)
                 statusIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.read, null))
             else
@@ -73,9 +64,8 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 if (date != prevDate) {
                     dateTV.visible()
                     dateTV.text = date.toChatDate()
-                } else {
+                } else
                     dateTV.gone()
-                }
             }
 
 
@@ -92,7 +82,7 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 playPauseAudio?.invoke(position)
             }
 
-            if (messages[position].receiverId == SpUtils.getString(context, Constants.USER_ID)) {
+            if (messages[position].receiverId == getString(context, Constants.USER_ID)) {
                 receivedLayout.visibility = View.VISIBLE
                 sentLayout.visibility = View.GONE
                 if (!messages[position].image.isNullOrEmpty()) {
@@ -103,26 +93,13 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                     senderDP.gone()
                     setImage(messages[position].image ?: "", receivedIV)
                 } else if (!messages[position].audio.isNullOrEmpty()) {
-
                     receivedMsgRl.gone()
                     senderDP.visible()
                     receivedAudioMsgRL.visible()
                   if (messages[position].isPlaying == true)
-                        playIV.setImageDrawable(
-                            ResourcesCompat.getDrawable(
-                                context.resources,
-                                R.drawable.pause,
-                                null
-                            )
-                        )
+                        playIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.pause, null))
                     else
-                        playIV.setImageDrawable(
-                            ResourcesCompat.getDrawable(
-                                context.resources,
-                                R.drawable.play,
-                                null
-                            )
-                        )
+                        playIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.play, null))
                 }
                 else {
                     receivedIV.gone()
@@ -134,21 +111,9 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 }
                 receivedName.text = time
                 if (messages[position].gender == 1)
-                    senderDP.setImageDrawable(
-                        ResourcesCompat.getDrawable(
-                            context.resources,
-                            R.drawable.female,
-                            null
-                        )
-                    )
+                    senderDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
                 else
-                    senderDP.setImageDrawable(
-                        ResourcesCompat.getDrawable(
-                            context.resources,
-                            R.drawable.male,
-                            null
-                        )
-                    )
+                    senderDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
             } else {
                 sentLayout.visibility = View.VISIBLE
                 receivedLayout.visibility = View.GONE
@@ -164,21 +129,9 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                     myDP.gone()
                     sentAudioMsgRL.visible()
                     if (messages[position].isPlaying == true)
-                        sendPlayIV.setImageDrawable(
-                            ResourcesCompat.getDrawable(
-                                context.resources,
-                                R.drawable.pause,
-                                null
-                            )
-                        )
+                        sendPlayIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.pause, null))
                     else
-                        sendPlayIV.setImageDrawable(
-                            ResourcesCompat.getDrawable(
-                                context.resources,
-                                R.drawable.play,
-                                null
-                            )
-                        )
+                        sendPlayIV.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.play, null))
                 } else {
                     sentTV.text = messages[position].message
                     sendIV.gone()
@@ -191,22 +144,9 @@ class MessagesAdapter(var context: Context, private val messages: List<Message>)
                 senderName.text = time
 
                 if (messages[position].gender == 1)
-                    myDP.setImageDrawable(
-                        ResourcesCompat.getDrawable(
-                            context.resources,
-                            R.drawable.female,
-                            null
-                        )
-                    )
+                    myDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.female, null))
                 else
-                    myDP.setImageDrawable(
-                        ResourcesCompat.getDrawable(
-                            context.resources,
-                            R.drawable.male,
-                            null
-                        )
-                    )
-
+                    myDP.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.male, null))
             }
         }
     }

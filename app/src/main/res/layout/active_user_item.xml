@@ -43,7 +43,6 @@
             android:layout_marginTop="@dimen/_3sdp"
             android:layout_toRightOf="@id/userIV"
             android:fontFamily="sans-serif"
-            android:text="User Name"
             android:textColor="@color/white"
             android:textSize="@dimen/_12ssp" />
 </LinearLayout>

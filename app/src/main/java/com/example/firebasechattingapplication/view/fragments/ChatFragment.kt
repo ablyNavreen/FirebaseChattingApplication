@@ -35,7 +35,7 @@ import com.example.firebasechattingapplication.utils.CommonFunctions.showSetting
 import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ImagePickerUtility
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.utils.encodeAudioToBase64
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
@@ -137,7 +137,7 @@ class ChatFragment : ImagePickerUtility() {
         binding.tv.text = receiverName
         setChatsAdapter()
         if (isFirstLoad) {  //to stop get message being called everytime i come back from zoom image fragment
-            getMessages(SpUtils.getString(requireContext(), Constants.USER_ID), receiverId)
+            getMessages(getString(requireContext(), Constants.USER_ID), receiverId)
             isFirstLoad = false
         }
         getActiveUsers()
@@ -156,13 +156,13 @@ class ChatFragment : ImagePickerUtility() {
                 onlineUser.addAll(messageList)
                 for (m in messageList)
                     if (m.id == receiverId)
-                        if (m.typing == true && m.typingToUserId == SpUtils.getString(
+                        if (m.typing == true && m.typingToUserId == getString(
                                 requireContext(),
                                 Constants.USER_ID
                             )
                         )
                             binding.lastSeenTV.text = getString(R.string.typing)
-                        else if (m.recording == true && m.typingToUserId == SpUtils.getString(
+                        else if (m.recording == true && m.typingToUserId == getString(
                                 requireContext(),
                                 Constants.USER_ID
                             )
@@ -199,7 +199,7 @@ class ChatFragment : ImagePickerUtility() {
                     fetchUserToken(messageList)
 
                 updateMessageStatus(
-                    receiverId + SpUtils.getString(
+                    receiverId + getString(
                         requireContext(),
                         Constants.USER_ID
                     )
@@ -221,7 +221,7 @@ class ChatFragment : ImagePickerUtility() {
 
     private fun fetchUserToken(messageList: List<Message>) {
        for(m in messageList){
-           if (m.senderId != SpUtils.getString(requireContext(), Constants.USER_ID))
+           if (m.senderId != getString(requireContext(), Constants.USER_ID))
                receiverToken = m.senderToken
            else
                receiverToken = m.receiverToken
@@ -261,11 +261,12 @@ class ChatFragment : ImagePickerUtility() {
         binding.recordIV.setOnClickListener {
             if (isRecording) {
                 //stop recording and send the encoded date to firestore
-                val audioFile =
-                    AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
-                val base64Audio = encodeAudioToBase64(audioFile.filePath)
-                if (base64Audio != null) {
-                    sendMessage(null, base64Audio)
+                val audioFile = AudioRecorderHelper.stopRecording(requireContext(), binding.recordIV)
+                if (audioFile!=null){
+                    val base64Audio = encodeAudioToBase64(audioFile.filePath)
+                    if (base64Audio != null) {
+                        sendMessage(null, base64Audio)
+                    }
                 }
                 updateTypingStatus(isTyping = false, isRecording = false)
             } else {
@@ -288,18 +289,18 @@ class ChatFragment : ImagePickerUtility() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun sendMessage(message: String?, base64Audio: String?) {
         val message = Message(
-            senderId = SpUtils.getString(requireContext(), Constants.USER_ID),
+            senderId = getString(requireContext(), Constants.USER_ID),
             receiverId = receiverId,
-            senderName = SpUtils.getString(requireContext(), Constants.USER_NAME),
+            senderName = getString(requireContext(), Constants.USER_NAME),
             receiverName = receiverName,
             message = message,
             time = getCurrentUtcDateTimeModern(),
             read = false,
-            gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
-            senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
+            gender = getString(requireContext(), Constants.USER_GENDER)?.toInt(),
+            senderGender = getString(requireContext(), Constants.USER_GENDER)?.toInt(),
             receiverGender = receiverGender,
             receiverToken = receiverToken,
-            senderToken = SpUtils.getString(requireContext(), Constants.USER_TOKEN),
+            senderToken = getString(requireContext(), Constants.USER_TOKEN),
             audio = base64Audio
         )
         binding.messageET.text = null
@@ -480,24 +481,25 @@ class ChatFragment : ImagePickerUtility() {
     override fun selectedImage(imagePath: String?, code: Int, type: String, uri: Uri) {
         if (imagePath != null) {
             val message = Message(
-                senderId = SpUtils.getString(requireContext(), Constants.USER_ID),
+                senderId = getString(requireContext(), Constants.USER_ID),
                 receiverId = receiverId,
-                senderName = SpUtils.getString(requireContext(), Constants.USER_NAME),
+                senderName = getString(requireContext(), Constants.USER_NAME),
                 receiverName = receiverName,
                 message = binding.messageET.text.toString().trim(),
                 time = getCurrentUtcDateTimeModern(),
                 read = false,
-                gender = SpUtils.getString(requireContext(), Constants.USER_GENDER)?.toInt(),
-                senderGender = SpUtils.getString(requireContext(), Constants.USER_GENDER)
+                gender = getString(requireContext(), Constants.USER_GENDER)?.toInt(),
+                senderGender = getString(requireContext(), Constants.USER_GENDER)
                     ?.toInt(),
                 receiverGender = receiverGender,
                 receiverToken = receiverToken,
-                senderToken = SpUtils.getString(requireContext(), Constants.USER_TOKEN),
+                senderToken = getString(requireContext(), Constants.USER_TOKEN),
             )
             authViewModel.uploadImage(imagePath, message)
             authViewModel.authState.observe(viewLifecycleOwner) { state ->
                 when (state) {
                     is AuthState.Error -> {
+                        Log.d("rghejgrhkjgre", "selectedImage: ${state.message} ")
                         showToast(requireContext(),"Error while sending message. Please try again.")
                     }
 
@@ -546,7 +548,7 @@ class ChatFragment : ImagePickerUtility() {
                     val percent = (100 * player.currentPosition) / player.duration
                     val holder = binding.messagesRV.findViewHolderForAdapterPosition(index)
                             as? MessagesAdapter.HomeViewHolder
-                    if (messages[index].receiverId == SpUtils.getString(
+                    if (messages[index].receiverId == getString(
                             requireContext(),
                             Constants.USER_ID
                         )

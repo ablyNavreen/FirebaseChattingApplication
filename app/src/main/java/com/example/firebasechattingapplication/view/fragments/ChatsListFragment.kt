@@ -14,7 +14,7 @@ import com.example.firebasechattingapplication.databinding.FragmentChatListBindi
 import com.example.firebasechattingapplication.model.dataclasses.Message
 import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.visible
 import com.example.firebasechattingapplication.view.adapters.ChatsAdapter
@@ -51,33 +51,16 @@ class ChatsListFragment : Fragment() {
         viewModel.getAllMessages()
             .onEach { messageList ->
                 messages.clear()
-                val myChats = messageList.filter {
-                    it.senderId == SpUtils.getString(
-                        requireContext(),
-                        Constants.USER_ID
-                    ) || it.receiverId == SpUtils.getString(requireContext(), Constants.USER_ID)
-                }
+                val myChats = messageList.filter { it.senderId == getString(requireContext(), Constants.USER_ID) || it.receiverId == getString(requireContext(), Constants.USER_ID) }
                 for (m in myChats) {
-                    val sentByMe = m.senderId == SpUtils.getString(
-                            requireContext(),
-                            Constants.USER_ID
-                        )
-                    messages.add(
-                        Message(
-                            senderId = if (!sentByMe) m.senderId else m.receiverId,
+                    val sentByMe = m.senderId == getString(requireContext(), Constants.USER_ID)
+                    messages.add(Message(senderId = if (!sentByMe) m.senderId else m.receiverId,
                             senderName = if (!sentByMe) m.senderName else m.receiverName,
                             senderToken = if (!sentByMe) m.senderToken else m.receiverToken,
-                            time = m.time,
-                            read = m.read,
-                            message = m.message,
+                            time = m.time, read = m.read, message = m.message,
                             gender = if (!sentByMe) m.senderGender else m.receiverGender,
                             senderGender = if (!sentByMe) m.senderGender else m.receiverGender,
-                            sentByMe = sentByMe,
-                            image = m.image?:"",
-                            audio = m.audio
-                        )
-                    )
-
+                            sentByMe = sentByMe, image = m.image?:"", audio = m.audio))
                 }
                 val sortedList = messages.sortedBy { it.time }.groupBy { it.senderId }.values.mapNotNull { it.lastOrNull() }
                 messages.clear()
@@ -85,9 +68,8 @@ class ChatsListFragment : Fragment() {
                 if (myChats.isNotEmpty()) {
                     binding.noMessagesTV.gone()
                     chatsAdapter?.notifyDataSetChanged()
-                } else {
+                } else
                     binding.noMessagesTV.visible()
-                }
             }
             .catch { e ->
                 Log.e("Chat", "Error collecting combined messages: ${e.message}")

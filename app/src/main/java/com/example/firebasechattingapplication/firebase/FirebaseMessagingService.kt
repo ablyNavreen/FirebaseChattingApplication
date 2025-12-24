@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.utils.Constants
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.view.activities.MainActivity
 import com.example.firebasechattingapplication.view.fragments.ChatFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -27,7 +28,6 @@ import javax.inject.Inject
 class FirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
-
     @Inject
     lateinit var firebaseFirestore: FirebaseFirestore
     private val TAG = "FCM_TOKEN_SERVICE"
@@ -56,7 +56,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                     intent.putExtra("sender_gender", senderGender)
                     intent.putExtra("sender_token", senderToken)
                     intent.putExtra("message", message)
-                    if (!ChatFragment.isChatOpen)
+                    if (!ChatFragment.isChatOpen && getString(this, Constants.USER_ID)!=null)
                         makePush(intent, senderName,message)
                 }
             } catch (_: Exception) {

@@ -1,23 +1,12 @@
 package com.example.firebasechattingapplication.utils
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Base64
 import android.util.Log
 import android.util.Patterns
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.fragment.app.Fragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -36,19 +25,18 @@ fun isValidEmail(email: String): Boolean {
 }
 
 
-fun View.visible(){
+fun View.visible() {
     this.visibility = View.VISIBLE
 }
 
-fun View.gone(){
+fun View.gone() {
     this.visibility = View.GONE
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentUtcDateTimeModern(): String {
     val nowUtc = Instant.now()
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        .withZone(ZoneId.of("UTC"))
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneId.of("UTC"))
     return formatter.format(nowUtc)
 }
 
@@ -88,10 +76,8 @@ fun Long.toLastSeenTime(): String {
 fun formatIsoDateTime(isoString: String?): Pair<String, String> {
     val instant = Instant.parse(isoString)
     val localDateTime = instant.atZone(ZoneId.systemDefault())
-    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-        .withLocale(Locale.getDefault())
-    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
-        .withLocale(Locale.getDefault())
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy").withLocale(Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withLocale(Locale.getDefault())
     val formattedDate = localDateTime.format(dateFormatter)
     val formattedTime = localDateTime.format(timeFormatter)
     return Pair(formattedDate, formattedTime)
@@ -111,7 +97,8 @@ fun String.toChatDate(
             today -> "Today"
             yesterday -> "Yesterday"
             else -> {
-                val outputFormatter = DateTimeFormatter.ofPattern(outputFormatPattern, Locale.getDefault())
+                val outputFormatter =
+                    DateTimeFormatter.ofPattern(outputFormatPattern, Locale.getDefault())
                 inputDate.format(outputFormatter)
             }
         }
@@ -137,17 +124,15 @@ fun encodeAudioToBase64(filePath: String): String? {
     if (!audioFile.exists())
         return null
     val fileSizeInKB = audioFile.length() / 1024
-    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${(audioFile.length())/1024}")
+    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${(audioFile.length()) / 1024}")
     if (fileSizeInKB > 700) { //check to restrict the file size to 1 mb
         Log.e("Base64", "File too large for Firestore!")
         return null
     }
     return try {
-            val bytes = audioFile.readBytes()
-            val ff =Base64.encodeToString(bytes, Base64.NO_WRAP)  //NO_WRAP -> remove next lines from base64 data    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${audioFile.length()}")
-        Log.d("lwkehjnkejhfh", "encodeAudioToBase64: after = ${(ff.length)/1024}")
-
-
+        val bytes = audioFile.readBytes()
+        val ff = Base64.encodeToString(bytes, Base64.NO_WRAP)  //NO_WRAP -> remove next lines from base64 data    Log.d("lwkehjnkejhfh", "encodeAudioToBase64: before = ${audioFile.length()}")
+        Log.d("lwkehjnkejhfh", "encodeAudioToBase64: after = ${(ff.length) / 1024}")
         ff
     } catch (e: Exception) {
         e.printStackTrace()

@@ -30,10 +30,10 @@ import com.example.firebasechattingapplication.model.AuthState
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.google.GoogleOAuthHelper
 import com.example.firebasechattingapplication.utils.ProgressIndicator
-import com.example.firebasechattingapplication.utils.SpUtils
 import com.example.firebasechattingapplication.google.TokenAcquisitionListener
 import com.example.firebasechattingapplication.utils.CommonFunctions.showSettingsDialog
 import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.example.firebasechattingapplication.utils.gone
 import com.example.firebasechattingapplication.utils.visible
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity(), TokenAcquisitionListener {
 
 
     private fun checkUserSession() {
-        if (SpUtils.getString(this@MainActivity, Constants.USER_ID) != null) {
+        if (getString(this@MainActivity, Constants.USER_ID) != null) {
             viewModel.isUserLogged()
             viewModel.authState.observe(this) { state ->
                 when (state) {

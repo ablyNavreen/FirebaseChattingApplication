@@ -55,13 +55,15 @@ object AudioRecorderHelper {
     }
 
     // Stop recording and save the file
-    fun stopRecording(context: Context,recordIV: ImageView) : AudioRecording {
+    fun stopRecording(context: Context,recordIV: ImageView) : AudioRecording? {
         mRecorder?.apply {
             try {
                 stop()
             } catch (_: IllegalStateException) {
                 // called too early - not enough recording to be saved
+                File(audioFilePath).delete()
                 Log.e("AudioRecorder", "Stop failed: Recording was too short or not initialized.")
+                return null
             } finally {
                 release()   //release system resource
                 mRecorder = null

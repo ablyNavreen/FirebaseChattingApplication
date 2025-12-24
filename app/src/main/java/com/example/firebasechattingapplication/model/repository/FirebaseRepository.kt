@@ -1,5 +1,6 @@
 package com.example.firebasechattingapplication.model.repository
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -11,7 +12,7 @@ import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.Constants.ONLINE_USERS_COLLECTION
 import com.example.firebasechattingapplication.utils.Constants.USERS_COLLECTION
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -83,7 +84,7 @@ class FirebaseRepository @Inject constructor(
         typingToUserId: String,
         isRecording: Boolean
     ) {
-        val userId = SpUtils.getString(context, Constants.USER_ID)
+        val userId = getString(context, Constants.USER_ID)
         if (userId.isNullOrEmpty()) {
             Log.e("Firebase", "User ID is null or empty. Cannot update status.")
             return
@@ -104,10 +105,9 @@ class FirebaseRepository @Inject constructor(
                     typingToUserId = typingToUserId,
                     lastSeen = getCurrentUtcDateTimeModern(),
                     currentTime = getCurrentUtcDateTimeModern(),
-                    name = SpUtils.getString(context, Constants.USER_NAME),
-                    email = SpUtils.getString(context, Constants.USER_EMAIL),
-                    gender = SpUtils.getString(context, Constants.USER_GENDER)?.toInt()
-                )
+                    name = getString(context, Constants.USER_NAME),
+                    email = getString(context, Constants.USER_EMAIL),
+                    gender = getString(context, Constants.USER_GENDER)?.toInt())
                 documentRef.set(newPresenceData).await()
             }
         }
@@ -119,15 +119,62 @@ class FirebaseRepository @Inject constructor(
         return firebaseAuth.signOut()
     }
 
+    //delete
+    suspend fun deleteAccount(): Void? {
+        return firebaseAuth.currentUser?.delete()?.await()
+    }
+
+
+    //delete user data
+    suspend fun deleteUserData(userId: String?) {
+        if (!userId.isNullOrEmpty()) {
+            firebaseFirestore.collection(USERS_COLLECTION).document(userId).delete().await()
+            firebaseFirestore.collection(ONLINE_USERS_COLLECTION).document(userId).delete().await()
+
+           firebaseFirestore.collection(Constants.MESSAGES_COLLECTION) // The top level collection
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    Log.d(TAG, "deleteUserData: ${querySnapshot.documents}")
+            }
+
+      /*      val myRoomRefs = chatRooms.documents
+                .filter { it.id.contains(userId) }
+                .map { it.reference }
+
+            if (myRoomRefs.isNotEmpty()) {
+                myRoomRefs.chunked(500).forEach { chunk ->
+                    val batch = firebaseFirestore.batch()
+                    for (roomRef in chunk) {
+                        batch.delete(roomRef) // This deletes the Room document itself
+                    }
+                    batch.commit().await()
+                    Log.d("Firestore", "Deleted a batch of ${chunk.size} chat rooms")
+                }
+            }*/
+
+         /*   val myChats = firebaseFirestore.collectionGroup(Constants.MESSAGES_COLLECTION)
+                .get()
+                .await()
+            val docsToDelete = myChats.documents.filter { it.reference.path.contains(userId) }
+            if (docsToDelete.isNotEmpty()) {
+                // Use chunked(500) to respect Firestore limits otherwise can crash if data is large
+                docsToDelete.chunked(500).forEach { chunk ->
+                    val batch = firebaseFirestore.batch()
+                    chunk.forEach { batch.delete(it.reference) }
+                    batch.commit().await()
+                }
+            }*/
+        }
+    }
+
+
     //update message status as read
     fun updateMessageStatus(chatId: String) {
         val documentRef = firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
             .document(chatId)
             .collection(Constants.MESSAGES_SUB_COLLECTION)
-        documentRef
-            .whereEqualTo("read", false)  //remove unnecessary rewrites
-            .get()
-            .addOnSuccessListener { querySnapshot ->
+        documentRef.whereEqualTo("read", false)  //remove unnecessary rewrites
+            .get().addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.isEmpty) {
                     println("No messages found to update.")
                     return@addOnSuccessListener
@@ -144,8 +191,6 @@ class FirebaseRepository @Inject constructor(
                     .addOnFailureListener { e -> println("Error committing batch update: $e") }
             }
             .addOnFailureListener { e -> println("Error fetching messages for update: $e") }
-
-
     }
 
     //get messages btw two users
@@ -244,7 +289,7 @@ class FirebaseRepository @Inject constructor(
                 //emit the new list to the collector
                 trySend(messages.filter {
                     //filter the list -> user doesn't see themselves in the active list
-                    it.id != SpUtils.getString(context = context, Constants.USER_ID)
+                    it.id != getString(context = context, Constants.USER_ID)
                 })
             } else if (snapshot != null && snapshot.isEmpty) {
                 // Emit an empty list if no docs

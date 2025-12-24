@@ -11,7 +11,7 @@ import com.example.firebasechattingapplication.R
 import com.example.firebasechattingapplication.databinding.FragmentProfileBinding
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.Constants.USER_GENDER
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
 
 
 class ProfileFragment : Fragment() {
@@ -30,7 +30,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
-            if (SpUtils.getString(requireContext(), USER_GENDER)?.toInt()== 1){
+            if (getString(requireContext(), USER_GENDER)?.toInt()== 1){
                 profileIV.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.female, null))
                 userGenderTV.text = getString(R.string.female)
             }
@@ -38,9 +38,9 @@ class ProfileFragment : Fragment() {
                 profileIV.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.male, null))
                 userGenderTV.text = getString(R.string.male)
             }
-            usernameTV.text = SpUtils.getString(requireContext(), Constants.USER_NAME)
-            userEmailTv.text = SpUtils.getString(requireContext(), Constants.USER_EMAIL)
-            userIdTV.text = SpUtils.getString(requireContext(), Constants.USER_ID)
+            usernameTV.text = getString(requireContext(), Constants.USER_NAME)
+            userEmailTv.text = getString(requireContext(), Constants.USER_EMAIL)
+            userIdTV.text = getString(requireContext(), Constants.USER_ID)
 
         }
         setUpClickListeners()

@@ -35,9 +35,9 @@ object FirebaseModule {
         return FcmSender()
     }
 
-    @Provides
+  /*  @Provides
     @Singleton
     fun getFirebaseStorage(): FirebaseStorage {
         return Firebase.storage
-    }
+    }*/
 }

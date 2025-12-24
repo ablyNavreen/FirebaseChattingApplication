@@ -18,7 +18,9 @@ import com.example.firebasechattingapplication.model.dataclasses.OnlineUser
 import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.model.repository.FirebaseRepository
 import com.example.firebasechattingapplication.utils.Constants
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.cleanPref
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.getString
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.saveString
 import com.example.firebasechattingapplication.utils.getCurrentUtcDateTimeModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,7 +33,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,7 +68,7 @@ class AuthViewModel @Inject constructor(
                 val result = repository.registerUser(userData.email.toString(), userData.password.toString())
                 //after successful registration save user info to firestore
                 repository.getAndSaveFCMToken { token ->  //fetch fcm token
-                    SpUtils.saveString(application, Constants.USER_TOKEN, token)
+                    saveString(application, Constants.USER_TOKEN, token)
                     val user = User(
                         name = userData.name.toString(),
                         email = userData.email, gender = userData.gender,
@@ -91,9 +92,8 @@ class AuthViewModel @Inject constructor(
             try {
                 //hit repo method to check user login
                 val result = repository.loginUser(email, password)
-                SpUtils.saveString(application, Constants.USER_ID, result?.user?.uid)
+                saveString(application, Constants.USER_ID, result?.user?.uid)
                 updateFCMToken()
-//                _authState.value = AuthState.Success(result?.user?.uid ?: "")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
@@ -136,10 +136,24 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.logoutUser()
-                SpUtils.cleanPref(application)
+                cleanPref(application)
                 _authState.value = AuthState.Success("Logged out successfully")
             } catch (e: java.lang.Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Logout failed")
+            }
+        }
+    }
+
+
+    fun deleteAccount() {
+        _authState.value = AuthState.Loading
+        viewModelScope.launch {
+            try {
+               repository.deleteAccount()
+                repository.deleteUserData(getString(application, Constants.USER_ID))
+                _authState.value = AuthState.Success("Account deleted successfully")
+            } catch (e: java.lang.Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Deletion failed")
             }
         }
     }
@@ -259,8 +273,8 @@ class AuthViewModel @Inject constructor(
         repository.getAndSaveFCMToken { token ->
             Log.d("updateFCMToken", "updateFCMToken: $token")
             viewModelScope.launch {
-                SpUtils.saveString(application, Constants.USER_TOKEN, token)
-                val status = repository.updateFCMToken(SpUtils.getString(application, Constants.USER_ID) ?: "", token)
+                saveString(application, Constants.USER_TOKEN, token)
+                val status = repository.updateFCMToken(getString(application, Constants.USER_ID) ?: "", token)
 
                 when (status) {
                     is AuthState.Success -> {
@@ -285,7 +299,7 @@ class AuthViewModel @Inject constructor(
                 val options = BitmapFactory.Options().apply { inSampleSize = 2 }
                 val bitmap = BitmapFactory.decodeFile(imageUri, options)
                 val outputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
                 val imageBytes = outputStream.toByteArray()
                 sendMessageToUser(
                     message = message.copy(

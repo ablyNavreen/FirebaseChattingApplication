@@ -16,7 +16,7 @@ import com.example.firebasechattingapplication.model.dataclasses.User
 import com.example.firebasechattingapplication.utils.CommonFunctions.showToast
 import com.example.firebasechattingapplication.utils.Constants
 import com.example.firebasechattingapplication.utils.ProgressIndicator
-import com.example.firebasechattingapplication.utils.SpUtils
+import com.example.firebasechattingapplication.utils.SharedPreferencesHelper.saveString
 import com.example.firebasechattingapplication.utils.isValidEmail
 import com.example.firebasechattingapplication.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,6 +54,18 @@ class RegisterFragment : Fragment() {
                 //start registration process
                 if (validateRegister())
                     hitRegisterUser()
+            }
+            femaleCB.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    if (maleCB.isChecked)
+                        maleCB.isChecked = false
+                }
+            }
+            maleCB.setOnCheckedChangeListener {  buttonView, isChecked ->
+                if (isChecked){
+                    if (femaleCB.isChecked)
+                        femaleCB.isChecked = false
+                }
             }
         }
     }
@@ -115,10 +127,10 @@ class RegisterFragment : Fragment() {
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     //save user id and move to home
-                    SpUtils.saveString(requireContext(), Constants.USER_ID, state.userId)
-                    SpUtils.saveString(requireContext(), Constants.USER_GENDER, gender.toString())
-                    SpUtils.saveString(requireContext(), Constants.USER_NAME, binding.nameET.text.toString().trim())
-                    SpUtils.saveString(requireContext(), Constants.USER_EMAIL, binding.emailET.text.toString().trim())
+                    saveString(requireContext(), Constants.USER_ID, state.userId)
+                    saveString(requireContext(), Constants.USER_GENDER, gender.toString())
+                    saveString(requireContext(), Constants.USER_NAME, binding.nameET.text.toString().trim())
+                    saveString(requireContext(), Constants.USER_EMAIL, binding.emailET.text.toString().trim())
                     findNavController().navigate(R.id.homeFragment)
                 }
             }

@@ -2,6 +2,7 @@ package com.example.firebasechattingapplication.view.fragments
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,46 +42,70 @@ class SettingsFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setUpClickListeners()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setUpClickListeners() {
-            binding.logoutLayout.setOnClickListener {
-                showYesNoDialog(requireActivity(),"Logout", "Are you sure you want to logout?", "Logout", "Cancel", onPositiveClick = {
-                    updateOnlineStatus()
-                })
+        binding.apply {
+            deleteLayout.setOnClickListener {
+                showYesNoDialog(
+                    requireActivity(),
+                    "Logout",
+                    "Are you sure you want to delete your account?",
+                    "Delete Account",
+                    "Cancel",
+                    onPositiveClick = {
+                        updateOnlineStatus(1)
+                    })
             }
-            binding.profileLayout.setOnClickListener {
+            logoutLayout.setOnClickListener {
+                showYesNoDialog(
+                    requireActivity(),
+                    "Logout",
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    "Cancel",
+                    onPositiveClick = {
+                        updateOnlineStatus(0)
+                    })
+            }
+            profileLayout.setOnClickListener {
                 findNavController().navigate(R.id.action_settingsFragment_to_profileFragment)
             }
-
+        }
     }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateOnlineStatus() {
+    private fun updateOnlineStatus(requestType: Int) {
         lifecycleScope.launch {
             viewModel.updateOnlineStatusFlow(
                 isOnline = false,
                 isTyping = false,
-                getCurrentUtcDateTimeModern(),""
+                getCurrentUtcDateTimeModern(), ""
             )
                 .collect { state ->
                     when (state) {
                         is AuthState.Error -> {
                             ProgressIndicator.hide()
-                            showToast(requireContext(),state.message)
+                            showToast(requireContext(), state.message)
                         }
+
                         AuthState.Loading -> {
                             ProgressIndicator.show(requireContext())
                         }
+
                         is AuthState.Success -> {
-                            logoutUser()
+                            if (requestType == 0)
+                                logoutUser()
+                            else
+                                deleteAccount()
                         }
                     }
                 }
         }
     }
+
     private fun logoutUser() {
         viewModel.logoutUser()
         viewModel.authState.observe(viewLifecycleOwner) { state ->
@@ -89,9 +114,31 @@ class SettingsFragment : Fragment() {
                     ProgressIndicator.hide()
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                 }
+
                 AuthState.Loading -> {
                     ProgressIndicator.show(requireContext())
                 }
+
+                is AuthState.Success -> {
+                    ProgressIndicator.hide()
+                    (activity as MainActivity).performLogoutAndResetUI()
+                }
+            }
+        }
+    }
+    private fun deleteAccount() {
+        viewModel.deleteAccount()
+        viewModel.authState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is AuthState.Error -> {
+                    ProgressIndicator.hide()
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                }
+
+                AuthState.Loading -> {
+                    ProgressIndicator.show(requireContext())
+                }
+
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     (activity as MainActivity).performLogoutAndResetUI()
