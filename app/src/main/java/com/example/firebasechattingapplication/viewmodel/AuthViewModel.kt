@@ -149,9 +149,9 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
-               repository.deleteAccount()
                 repository.deleteUserData(getString(application, Constants.USER_ID))
-                _authState.value = AuthState.Success("Account deleted successfully")
+                repository.deleteAccount()
+                _authState.value = AuthState.Success("Account deleted successfully.")
             } catch (e: java.lang.Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Deletion failed")
             }

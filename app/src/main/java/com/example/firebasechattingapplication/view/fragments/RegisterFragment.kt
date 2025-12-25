@@ -127,7 +127,7 @@ class RegisterFragment : Fragment() {
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
                     //save user id and move to home
-                    saveString(requireContext(), Constants.USER_ID, state.userId)
+                    saveString(requireContext(), Constants.USER_ID, state.data)
                     saveString(requireContext(), Constants.USER_GENDER, gender.toString())
                     saveString(requireContext(), Constants.USER_NAME, binding.nameET.text.toString().trim())
                     saveString(requireContext(), Constants.USER_EMAIL, binding.emailET.text.toString().trim())

@@ -141,6 +141,7 @@ class SettingsFragment : Fragment() {
 
                 is AuthState.Success -> {
                     ProgressIndicator.hide()
+                    showToast(requireContext(),state.data)
                     (activity as MainActivity).performLogoutAndResetUI()
                 }
             }

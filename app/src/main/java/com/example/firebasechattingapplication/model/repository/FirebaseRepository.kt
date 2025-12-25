@@ -1,6 +1,5 @@
 package com.example.firebasechattingapplication.model.repository
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -19,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.MetadataChanges
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.WriteBatch
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.channels.awaitClose
@@ -35,12 +35,10 @@ class FirebaseRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
 
-
     //register user
     suspend fun registerUser(email: String, password: String): AuthResult? {
         return firebaseAuth.createUserWithEmailAndPassword(email, password).await()
     }
-
 
     //login user
     suspend fun loginUser(email: String, password: String): AuthResult? {
@@ -49,7 +47,6 @@ class FirebaseRepository @Inject constructor(
             password
         )  //pass the email & password to check the user login if account exists or not
             .await()  //pause the coroutine till we get result
-
     }
 
     //check current user session
@@ -66,12 +63,28 @@ class FirebaseRepository @Inject constructor(
     }
 
     //send message
-    suspend fun sendMessageToUser(message: Message) {
+/*    suspend fun sendMessageToUser(message: Message) {
         firebaseFirestore.collection(Constants.MESSAGES_COLLECTION)
             .document(message.senderId + message.receiverId)
             .collection(Constants.MESSAGES_SUB_COLLECTION)
             .add(message)
             .await()
+    }*/
+
+    suspend fun sendMessageToUser(message: Message) {
+        val db = firebaseFirestore
+        val parentDocRef = db
+            .collection(Constants.MESSAGES_COLLECTION)
+            .document(message.senderId + message.receiverId)
+        val subCollectionRef = parentDocRef.collection(Constants.MESSAGES_SUB_COLLECTION)
+        db.runBatch { batch ->
+            //add count to the parent document actual data -> resolve shallow doc issue
+            val parentData = mapOf("messagesCount" to message.unreadMessages)
+            batch.set(parentDocRef, parentData, SetOptions.merge())
+            //add the message to the sub-collection
+            val newMessageRef = subCollectionRef.document()
+            batch.set(newMessageRef, message)
+        }.await()
     }
 
     //manage active status
@@ -113,7 +126,6 @@ class FirebaseRepository @Inject constructor(
         }
     }
 
-
     //logout
     fun logoutUser() {
         return firebaseAuth.signOut()
@@ -124,46 +136,36 @@ class FirebaseRepository @Inject constructor(
         return firebaseAuth.currentUser?.delete()?.await()
     }
 
-
     //delete user data
-    suspend fun deleteUserData(userId: String?) {
+   suspend fun deleteUserData(userId: String?) {
         if (!userId.isNullOrEmpty()) {
             firebaseFirestore.collection(USERS_COLLECTION).document(userId).delete().await()
             firebaseFirestore.collection(ONLINE_USERS_COLLECTION).document(userId).delete().await()
-
-           firebaseFirestore.collection(Constants.MESSAGES_COLLECTION) // The top level collection
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    Log.d(TAG, "deleteUserData: ${querySnapshot.documents}")
-            }
-
-      /*      val myRoomRefs = chatRooms.documents
-                .filter { it.id.contains(userId) }
-                .map { it.reference }
-
-            if (myRoomRefs.isNotEmpty()) {
-                myRoomRefs.chunked(500).forEach { chunk ->
-                    val batch = firebaseFirestore.batch()
-                    for (roomRef in chunk) {
-                        batch.delete(roomRef) // This deletes the Room document itself
+            try {
+                // get all room documents from the base 'messages' collection
+                val querySnapshot = firebaseFirestore.collection(Constants.MESSAGES_COLLECTION).get().await()
+                // filter for rooms that belong to this specific user (e.g., "user1_user2")
+                val roomsToDelete = querySnapshot.documents.filter { it.id.contains(userId) }
+                if (roomsToDelete.isEmpty()) return
+                for (roomDoc in roomsToDelete) {
+                    val roomRef = roomDoc.reference
+                    // fetch all documents in the 'sub_messages' collection for this room
+                    val subMessagesSnapshot = roomRef.collection(Constants.MESSAGES_SUB_COLLECTION)
+                        .get()
+                        .await()
+                    // combine parent reference and child references into one list to delete
+                    val allRefsToDelete = subMessagesSnapshot.documents.map { it.reference }.toMutableList()
+                    allRefsToDelete.add(roomRef) // Add the parent document last
+                    // delete data in chunks of 500 (Firestore Batch Limit) -> error crash
+                    allRefsToDelete.chunked(500).forEach { chunk ->
+                        val batch = firebaseFirestore.batch()
+                        for (ref in chunk)
+                            batch.delete(ref)
+                        batch.commit().await()
                     }
-                    batch.commit().await()
-                    Log.d("Firestore", "Deleted a batch of ${chunk.size} chat rooms")
                 }
-            }*/
-
-         /*   val myChats = firebaseFirestore.collectionGroup(Constants.MESSAGES_COLLECTION)
-                .get()
-                .await()
-            val docsToDelete = myChats.documents.filter { it.reference.path.contains(userId) }
-            if (docsToDelete.isNotEmpty()) {
-                // Use chunked(500) to respect Firestore limits otherwise can crash if data is large
-                docsToDelete.chunked(500).forEach { chunk ->
-                    val batch = firebaseFirestore.batch()
-                    chunk.forEach { batch.delete(it.reference) }
-                    batch.commit().await()
-                }
-            }*/
+            } catch (e: Exception) {
+            }
         }
     }
 
